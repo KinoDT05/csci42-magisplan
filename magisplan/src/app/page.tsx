@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
+import List from "@/components/List.jsx";
+import Button from "@/components/Button.jsx";
 interface TestData {
     id: number;
     desc: string;
@@ -27,6 +28,7 @@ export default function TestPage() {
                 setData(json.test);
             } catch (err: any) {
                 setError(err.message);
+                console.log(err.message)
             } finally {
                 setLoading(false);
             }
@@ -41,13 +43,10 @@ export default function TestPage() {
     return (
         <div>
             <h1>Test Data</h1>
-            <ul>
-                {data.map((t) => (
-                    <li key={t.id}>
-                        {t.id}: {t.desc}
-                    </li>
-                ))}
-            </ul>
+            <List data={data}/>
+
+            <Button label="This content" />
+            <Button label="This Hello" />
         </div>
     );
 }
