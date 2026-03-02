@@ -1,11 +1,15 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
   --main: #023e7d; 
   --accent: #33415C;
-  --gray: #e6e6e6;
+  --bg-gray: #e6e6e6;
+  --txt-gray: #666262;
 }
 
 @theme inline {
@@ -19,6 +23,16 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+  }
+}
+
+@layer components {
+  .input-field {
+    @apply w-full p-2 border rounded-lg;
+  }
+
+  .btn-primary {
+    @apply inline-block px-10 py-2 rounded-full text-white bg-[var(--accent)] hover:opacity-90 transition;
   }
 }
 
