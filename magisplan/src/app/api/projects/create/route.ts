@@ -6,6 +6,7 @@ const supabaseServiceKey = process.env.NEXT_PUBLIC_SERVICE_ROLE_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+// should be able to add committees and permissions for each committees (refer to system documentation)
 export async function POST(req: Request) {
     const {
         projectName,
@@ -37,7 +38,8 @@ export async function POST(req: Request) {
         );
     }
 
-    const { error: memberError } =await supabase.from("project_members").insert({
+    // creator is automatically set as moderator
+    const { error: memberError } = await supabase.from("project_members").insert({
         projectID: project.projectID,
         userID: userID,
         role: "moderator"
