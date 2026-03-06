@@ -75,7 +75,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(
-        { message: "User created" },
+        { message: "User created! Check your email to verify!" },
         { status: 201 }
     );
 }
