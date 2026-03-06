@@ -19,8 +19,12 @@ export default function CreateProject() {
     const [committees, setCommittees] = useState<Committee[]>(
         Array.from({ length: numCommittees }, () => ({ name: "", permissions: "" }))
     );
+
+
     const [userId, setUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true)
+
+
     const [message, setMessage] = useState("");
     const [creatorName, setCreatorName] = useState("");
 
