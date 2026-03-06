@@ -30,22 +30,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
-
-      {/*app name + desc*/}
-      <div className="w-1/2 bg-[var(--main)] text-white flex flex-col justify-center p-12 rounded-2xl text-start">
-        <h1 className="text-5xl font-bold mb-4 ml-10">
-          Welcome to
-          MagisPlan!
-        </h1>
-        <p className="text-md mx-10">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-        </p>
-      </div>
-
-      {/*log in essentials*/}
-      <div className="w-1/2 flex justify-center items-center text-center">
+      <div>
         <form onSubmit={handleLogin} className="p-8 w-96 space-y-4">
           <h2 className="text-2xl font-semibold text-center mb-4">
             Login
@@ -66,7 +51,5 @@ export default function LoginPage() {
           )}
         </form>
       </div>
-
-    </div>
   );
 }
