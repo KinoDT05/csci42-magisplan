@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
+
+
 
 export async function POST(req: Request) {
+    const supabase = await createClient();
     const { email, password } = await req.json();
 
     if (!email || !password ) {

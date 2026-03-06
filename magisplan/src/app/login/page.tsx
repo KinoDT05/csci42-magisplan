@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -24,10 +23,10 @@ export default function LoginPage() {
 
     if (!res.ok) {
         setError(data.error);
-    } else {
-        console.log("Session:", data.session);
-        router.push("/");
     }
+
+      router.push("/moderator/create-project");
+    
   }
 
   return (
