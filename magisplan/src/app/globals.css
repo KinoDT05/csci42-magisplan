@@ -57,6 +57,7 @@ aside {
   padding: 1rem;
   width: var(--sb-width);
   background: var(--accent);
+  transition: width 0.5s ease-in-out;
  }
 
  nav ul {
@@ -82,6 +83,9 @@ aside {
   font-size: 0.875rem;
   opacity: 0;
   visibility: hidden;
+  transition:
+    opacity 0.3 ease-in-out,
+    visibility 0.3 ease-in-out;
  }
 
  .sb-expanded nav a span {
@@ -89,4 +93,9 @@ aside {
   visibility: visible;
  }
 
+ main {
+  margin-left: var(--sb-width);
+  padding: 1rem 2rem;
+  transition: margin-left 0.5s ease-in-out;
+ }
 

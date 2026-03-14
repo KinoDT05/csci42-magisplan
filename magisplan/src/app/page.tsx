@@ -41,7 +41,7 @@ export default function TestPage() {
     if (error) return <p>Error: {error}</p>;
 
     return ( 
-        <div className="min-h-screen bg-[var(--main)] text-white flex flex-col justify-center">
+        <div className="min-h-screen bg-[var(--main)] text-white flex flex-col justify-center bg-cover">
             <div className="text-center space-y-20">
                 <h1 className="text-5xl font-bold mb-4 ml-10">
                     Welcome to MagisPlan!
