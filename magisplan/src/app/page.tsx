@@ -42,11 +42,8 @@ export default function TestPage() {
 
     return (
         <div>
-            <h1>Test Data</h1>
-            <List data={data}/>
-
-            <Button label="This content" />
-            <Button label="This Hello" />
+            <h1>Test Page</h1>
+            
         </div>
     );
 }
