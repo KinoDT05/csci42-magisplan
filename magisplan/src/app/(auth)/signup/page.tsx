@@ -50,7 +50,7 @@ export default function SignupPage() {
           <input className="input-field" placeholder="Create password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
 
           <p className="mt-8">
-            Already have an account? Log in here.
+            Already have an account? <a href="/login" className="text-[#0F5EA7]">Login here.</a>
           </p>
           <button type="submit" className="btn-primary">Sign Up</button>
 
