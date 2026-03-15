@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import bcrypt from 'bcryptjs';
-
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 
 
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
         );
     }
 
-    const { error: insertError } = await supabase.from("users").upsert({
+    const { error: insertError } = await supabaseAdmin.from("users").upsert({
         userID: authData.user.id,
         emailAddress,
         firstName,
