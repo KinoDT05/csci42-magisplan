@@ -42,11 +42,7 @@ export async function GET(
       startAt,
       endAt
       location,
-      eventKind,
-      modality,
-      meetingLink
-      eventTypeID
-      isPostingDate
+      eventKind
     `)
     .eq('projectID', Number(projectId))
     .lt('startAt', to)

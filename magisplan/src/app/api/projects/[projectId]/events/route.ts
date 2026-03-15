@@ -1,47 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-type CreateEventBody = {
+type MeetingBody = {
+  eventKind: "meeting";
   eventName: string;
   eventDescription?: string;
   startAt: string;
   endAt: string;
   location?: string | null;
-
-  eventKind: 'meeting' | 'activity';
-
-  // meeting
   modality?: 'onsite' | 'online';
   meetingLink?: string | null;
+};
 
-  // activity
-  eventTypeId?: string | null;
-  isPostingDate?: boolean;
+type ActivityBody = {
+  eventKind: "activity";
+  eventName: string;
+  eventDescription?: string;
+  startAt: string;
+  endAt: string;
+  location?: string | null;
+  activityType?: string;
+  blastRequired?: boolean;
 }
+
+type CreateEventBody = MeetingBody | ActivityBody;
 
 function validateEvent(body: CreateEventBody) {
   const starts = new Date(body.startAt);
   const ends = new Date(body.endAt);
+
+  if (!body.eventKind || !["meeting", "activity"].includes(body.eventKind)) {
+    return "eventKind must be either 'meeting' or 'activity'.";
+  }
 
   if (!body.eventName?.trim()) return 'Event name is required.';
   if (Number.isNaN(starts.getTime())) return 'Invalid start date';
   if (Number.isNaN(ends.getTime())) return 'Invalid end date';
   if (ends <= starts) return 'End date must be after start date.';
 
-  if (body.eventKind === 'meeting') {
-    if (!body.modality) return 'Meeting modality is required.';
+  if (body.eventKind === "meeting") {
+    const meetingBody = body as Partial<MeetingBody>;
 
-    if (body.modality === 'onsite' && !body.location?.trim()) {
-      return 'Location is required for onsite meetings.';
+    if (!meetingBody.modality || !["onsite", "online"].includes(meetingBody.modality)) {
+      return "The modality must be 'onsite' or 'online' for meetings.";
     }
 
-    if (body.modality === 'online' && !body.meetingLink?.trim()) {
-      return 'Meeting link is required for online meetings.';
+    if (meetingBody.modality === "online" && !meetingBody.meetingLink?.trim()) {
+      return "The meeting link is required for online or hybrid meetings.";
     }
-  }
-
-  if (body.eventKind === 'activity') {
-    if (!body.eventTypeId) return 'Activity type is required.';
   }
 
   return null;
