@@ -1,6 +1,5 @@
-export default function Button({ label} ) {
-    
+export default function Button({ label, className } ) {
     return (
-        <button>{ label }</button>
+        <button className={className}>{ label }</button>
     );
 }

@@ -34,10 +34,88 @@
   .btn-primary {
     @apply inline-block px-10 py-2 rounded-full text-white bg-[var(--accent)] hover:opacity-90 transition;
   }
+
+  .btn {
+    @apply inline-block px-10 py-2 rounded-full hover:opacity-90 transition;
+  }
 }
 
 body {
+  --sb-width: 6rem;
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.sb-expanded {
+  --sb-width: 12.5rem;
+}
+
+.sb-expanded aside {
+  width: var(--sb-width);
+}
+
+.sb-expanded main {
+  margin-left: var(--sb-width);
+}
+
+aside {
+  position: fixed;
+  inset: 0 auto 0 0;
+  padding: 1rem;
+  width: var(--sb-width);
+  background: var(--main);
+  transition: width 0.5s ease-in-out;
+ }
+
+ nav {
+  height: 100%;
+ }
+
+ nav ul {
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+  gap: 0.25rem;
+ }
+
+ nav li:last-child {
+  margin-top: auto;
+ }
+
+ nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  color: white;
+ }
+
+  nav a.active, nav a:hover, nav a:focus-visible {
+  background-color: #0F5EA7;
+ }
+
+ nav a span, .titleEx {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3 ease-in-out,
+    visibility 0.3 ease-in-out;
+  display: inline-block;
+ }
+
+ .sb-expanded nav a span,
+ .sb-expanded .titleEx {
+  opacity: 1;
+  visibility: visible;
+ }
+
+ .sb-expanded aside .collapsed {
+  rotate: 180deg;
+ }
+ 
+ main {
+  margin-left: var(--sb-width);
+  padding: 1rem 2rem;
+  transition: margin-left 0.5s ease-in-out;
+ }
