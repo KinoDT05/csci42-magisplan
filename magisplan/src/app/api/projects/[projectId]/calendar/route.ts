@@ -36,11 +36,11 @@ export async function GET(
     .from('events')
     .select(`
       eventID,
-      projectID
+      projectID,
       eventName,
       eventDescription,
       startAt,
-      endAt
+      endAt,
       location,
       eventKind
     `)

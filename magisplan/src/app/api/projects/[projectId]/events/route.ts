@@ -50,6 +50,16 @@ function validateEvent(body: CreateEventBody) {
     }
   }
 
+  if (body.eventKind === "activity") {
+    if (body.activityType !== undefined && typeof body.activityType !== "string") {
+      return "activityType must be a string.";
+    }
+
+    if (body.blastRequired !== undefined && typeof body.blastRequired !== "boolean") {
+      return "blastRequired must be a boolean.";
+    }
+  }
+
   return null;
 }
 
@@ -92,13 +102,14 @@ export async function POST(
         location: body.location ?? null,
         
         eventKind: body.eventKind,
-        modality: body.eventKind === 'meeting' ? body.modality ?? null : null,
-        meeting_link: body.eventKind === 'meeting' ? body.meetingLink ?? null : null,
 
-        eventTypeID:
-          body.eventKind === 'activity' ? body.eventTypeId ?? null : null,
-        isPostingDate:
-          body.eventKind === 'activity' ? !!body.isPostingDate : false,
+        // meeting fields
+        modality: body.eventKind === "meeting" ? body.modality : null,
+        meetingLink: body.eventKind === "meeting" ? body.meetingLink?.trim() || null : null,
+
+        // activity fields
+        activityType: body.eventKind === "activity" ? body.activityType?.trim() || null : null,
+        blastRequired: body.eventKind === "activity" ? body.blastRequired ?? false : false,
     })
     .select()
     .single();
