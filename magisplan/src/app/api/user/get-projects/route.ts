@@ -19,23 +19,23 @@ export async function GET() {
     const { data, error: errorInGet } = await supabase
         .from("project_members")
         .select(`projects (
-                  projectName,
-                  projectDescription,
-                  targetDate
-                )
-            `)
+              projectName,
+              projectDescription,
+              targetDate
+            )
+        `)
         .eq("userID", userID);
 
     const projects = data?.map((member) => member.projects);
 
-    
+
     if (errorInGet) {
         return NextResponse.json(
             { error: errorInGet.message },
             { status: 500 }
         );
     }
-    
+
     return new Response(
         JSON.stringify({ data: projects }),
         { status: 201 }
