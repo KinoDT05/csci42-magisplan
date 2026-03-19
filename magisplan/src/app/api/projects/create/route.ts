@@ -15,13 +15,6 @@ export async function POST(req: Request) {
         modDisplayName
     } = await req.json();
 
-    console.log(projectName);
-    console.log(projectDescription);
-    console.log(targetDate);
-    console.log(driveLink);
-    console.log(userID);
-    console.log(committees);
-
     if (!projectName ||
         !projectDescription ||
         !targetDate ||

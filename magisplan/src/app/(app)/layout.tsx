@@ -3,6 +3,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { useState } from "react";
+import LogoutButton from "@/components/LogoutButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,13 +53,17 @@ export default function RootLayout({
                   <img src="/project.svg" alt="Icon" width={30} />
                   <span>My Projects</span>
                 </a>
-              </li>
-              <li>
+                          </li>
+                          
+                          <li>
                 <a onClick={() => setExpanded(!expanded)}>
                     <img src="/arrow.svg" alt="Icon" width={30} className="collapsed" />
                   <span>Collapse</span>
                 </a>
               </li>
+                          <li>
+                              <LogoutButton />
+                          </li>
             </ul>
           </nav>
         </aside>
