@@ -8,7 +8,6 @@ export async function POST(req: Request) {
     const {
         projectName,
         projectDescription,
-        startDate,
         targetDate,
         driveLink,
         userID,
@@ -18,7 +17,6 @@ export async function POST(req: Request) {
 
     console.log(projectName);
     console.log(projectDescription);
-    console.log(startDate);
     console.log(targetDate);
     console.log(driveLink);
     console.log(userID);
@@ -26,7 +24,6 @@ export async function POST(req: Request) {
 
     if (!projectName ||
         !projectDescription ||
-        !startDate ||
         !targetDate ||
         !userID ||
         !committees
@@ -43,7 +40,7 @@ export async function POST(req: Request) {
         .insert({
             projectName,
             projectDescription,
-            startDate,
+            startDate: new Date(),
             targetDate,
             driveLink,
         })
@@ -98,7 +95,6 @@ export async function POST(req: Request) {
         const { error: insertErrorComm } = await supabase.from("committee").insert({
             projectID: project.projectID,
             committeeName: committees[i].name,
-            permission: committees[i].permissions
         });
 
         if (insertErrorComm) {

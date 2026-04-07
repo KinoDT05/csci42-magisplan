@@ -12,7 +12,6 @@ export default function CreateProject() {
 
     const [projectName, setProjectName] = useState("");
     const [projectDescription, setProjectDesc] = useState("");
-    const [startDate, setStartDate] = useState("");
     const [targetDate, setTargetDate] = useState("");
     const [driveLink, setDriveLink] = useState("");
     const [numCommittees, setNumCommittees] = useState(1);
@@ -72,7 +71,6 @@ export default function CreateProject() {
             body: JSON.stringify({
                 projectName,
                 projectDescription,
-                startDate,
                 targetDate,
                 driveLink,
                 userID: userId,
@@ -98,7 +96,6 @@ export default function CreateProject() {
 
                     <input className="input-field" placeholder="Project Name" value={projectName} onChange={e => setProjectName(e.target.value)} />
                     <input className="input-field" placeholder="Project Description" value={projectDescription} onChange={e => setProjectDesc(e.target.value)} />
-                    <input type="date" className="input-field" value={startDate} onChange={e => setStartDate(e.target.value)} />
                     <input type="date" className="input-field" value={targetDate} onChange={e => setTargetDate(e.target.value)} />
                     <input className="input-field" placeholder="Insert drive link (Optional)" value={driveLink} onChange={e => setDriveLink(e.target.value)} />
                     <label>
@@ -117,11 +114,6 @@ export default function CreateProject() {
                                 placeholder={`Committee ${index + 1} Name`}
                                 value={committee.name}
                                 onChange={(e) => handleCommitteeChange(index, "name", e.target.value)}
-                            />
-                            <input
-                                placeholder={`Committee ${index + 1} Permissions`}
-                                value={committee.permissions}
-                                onChange={(e) => handleCommitteeChange(index, "permissions", e.target.value)}
                             />
                         </div>
                     ))}
