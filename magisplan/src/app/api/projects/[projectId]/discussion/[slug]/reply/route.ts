@@ -1,11 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
-type RouteParams = { params: Promise<{ slug: string }> };
+type RouteParams = { params: Promise<{ projectId: string, slug: string }> };
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
   const supabase = await createClient();
-  const { slug } = await params;
+  const { projectId, slug } = await params;
   const topicID = Number(slug);
 
   if (isNaN(topicID)) {
