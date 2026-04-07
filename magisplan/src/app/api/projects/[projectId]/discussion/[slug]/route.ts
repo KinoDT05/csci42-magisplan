@@ -1,10 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
-type RouteParams = { params: Promise<{ slug: string }> };
+type RouteParams = { params: Promise<{ projectId: string, slug: string }> };
 
 export async function GET(_req: NextRequest, { params }: RouteParams) {
-  const { slug } = await params;
+  const { projectId, slug } = await params;
   const supabase = await createClient();
   const topicID = Number(slug);
   
