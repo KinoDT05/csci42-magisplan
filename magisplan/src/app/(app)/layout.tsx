@@ -1,8 +1,10 @@
-// import type { Metadata } from "next";
 "use client";
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,10 +18,22 @@ const geistMono = Geist_Mono({
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   const [expanded, setExpanded] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      console.log("USER:", data.user); 
+      setUserId(data.user?.id ?? null);
+    };
+
+    getUser();
+  }, []);
+
   return (
     <html lang="en">
       <body className={expanded ? "sb-expanded" : ""}>
@@ -27,42 +41,55 @@ export default function RootLayout({
           <nav>
             <ul>
               <li>
-                <p className="text-2xl font-bold titleEx text-white py-5">MagisPlan</p>
+                <p className="text-2xl font-bold titleEx text-white py-5">
+                  MagisPlan
+                </p>
               </li>
+
               <li>
-                <a href="#">
+                <Link href="#">
                   <img src="/home.svg" alt="Icon" width={30} />
                   <span>Home</span>
-                </a>
+                </Link>
               </li>
+
               <li>
-                <a href="#">
+                <Link href="#">
                   <img src="/chat.svg" alt="Icon" width={30} />
                   <span>Chat</span>
-                </a>
+                </Link>
               </li>
+
               <li>
-                <a href="#">
-                  <img src="/profile.svg" alt="Icon" width={30} />
-                  <span>Profile</span>
-                </a>
+                  <Link href={`/profile/${userId}`}>
+                    <img src="/profile.svg" alt="Icon" width={30} />
+                    <span>Profile</span>
+                  </Link>
               </li>
+
               <li>
-                <a href="#">
+                <Link href="#">
                   <img src="/project.svg" alt="Icon" width={30} />
                   <span>My Projects</span>
-                </a>
+                </Link>
               </li>
+
               <li>
                 <a onClick={() => setExpanded(!expanded)}>
-                    <img src="/arrow.svg" alt="Icon" width={30} className="collapsed" />
+                  <img
+                    src="/arrow.svg"
+                    alt="Icon"
+                    width={30}
+                    className="collapsed"
+                  />
                   <span>Collapse</span>
                 </a>
               </li>
             </ul>
           </nav>
         </aside>
-        <main  className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+
+        <main className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           {children}
         </main>
       </body>
