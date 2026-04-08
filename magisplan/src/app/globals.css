@@ -10,6 +10,7 @@
   --accent: #33415C;
   --bg-gray: #e6e6e6;
   --txt-gray: #666262;
+  --dark-gray: #33415C;
 }
 
 @theme inline {
@@ -37,6 +38,10 @@
 
   .btn {
     @apply inline-block px-10 py-2 rounded-full hover:opacity-90 transition;
+  }
+
+  .btn-secondary {
+    @apply inline-block px-10 py-2 rounded-lg text-white bg-[var(--dark-gray)] hover:opacity-90 transition;
   }
 }
 
