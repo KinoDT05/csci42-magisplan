@@ -20,8 +20,9 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
       topicName,
       topicDescription,
       isArchived,
-      dateCreated
-      `)
+      dateCreated,
+      userID
+    `)
     .eq("topicID", topicID)
     .eq("projectID", projectId)
     .single();
@@ -30,12 +31,20 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Discussion not found" }, { status: 404 });
   }
 
+  const { data: author } = await supabase
+    .from("project_members")
+    .select("displayName, committeeID, role")
+    .eq("userID", topic.userID)
+    .eq("projectID", projectId)
+    .single();
+
   const { data: replies, error: repliesError } = await supabase
     .from("discussion_reply")
     .select(`
       replyID,
       replyContent,
-      dateCreated
+      dateCreated,
+      userID
     `)
     .eq("topicID", topicID)
     .order("dateCreated", { ascending: true });
@@ -44,8 +53,22 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: repliesError.message }, { status: 500 });
   }
 
+  const repliesWithAuthors = await Promise.all(
+    (replies ?? []).map(async (reply) => {
+      const { data: replyAuthor } = await supabase
+        .from("project_members")
+        .select("displayName, committeeID, role")
+        .eq("userID", reply.userID)
+        .eq("projectID", projectId)
+        .single();
+
+      return { ...reply, author: replyAuthor ?? null };
+    })
+  );
+
   return NextResponse.json({
-    ...topic,
-    replies: replies ?? [],
+    ...(topic as Record<string, unknown>),
+    author: author ?? null,
+    replies: repliesWithAuthors,
   });
 }
