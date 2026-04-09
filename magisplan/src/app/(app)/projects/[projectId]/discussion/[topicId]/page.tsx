@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
 type Reply = { replyID: number; replyContent: string; dateCreated: string; };
 type Topic = { topicID: number; topicName: string; topicDescription: string; isArchived: boolean; dateCreated: string; replies: Reply[]; };
 
-export default function DiscussionDetailPage() {
-  const { slug } = useParams();
+export default function DiscussionDetailPage({ params }: { params: Promise<{ projectId: string; topicId: string }> } ) {
+  const { projectId, topicId } = use(params);
   const [topic, setTopic] = useState<Topic | null>(null);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -16,19 +16,19 @@ export default function DiscussionDetailPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const fetchTopic = async () => {
-    const res = await fetch(`/api/discussion/${slug}`);
+    const res = await fetch(`/api/projects/${projectId}/discussion/${topicId}`);
     const data = await res.json();
     if (!res.ok) { setError(data.error); return; }
     setTopic(data);
   };
 
-  useEffect(() => { fetchTopic(); }, [slug]);
+  useEffect(() => { fetchTopic(); }, [topicId]);
 
   const handleReplySubmit = async () => {
     setReplyError("");
     if (!replyContent.trim()) { setReplyError("Reply cannot be empty."); return; }
     setSubmitting(true);
-    const res = await fetch(`/api/discussion/${slug}/reply`, {
+    const res = await fetch(`/api/projects/${projectId}/discussion/${topicId}/reply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ replyContent }),
@@ -45,7 +45,7 @@ export default function DiscussionDetailPage() {
   if (!topic) return <p>Loading...</p>;
 
   return (
-    <div className="bg-[#FAF5F5]">
+    <div>
       <h1>{topic.topicName}</h1>
       <small>{topic.dateCreated}</small>
       <p>{topic.topicDescription}</p>
