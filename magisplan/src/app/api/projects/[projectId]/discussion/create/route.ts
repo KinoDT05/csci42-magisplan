@@ -7,7 +7,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   const supabase = await createClient();
   const { projectId } = await params;
 
-  const { topicName, topicDescription } = await req.json();
+  const { topicName, topicDescription, userID, committeeID } = await req.json();
 
   if (!topicName || !topicDescription) {
     return NextResponse.json(
@@ -21,10 +21,11 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     .insert({
       topicName,
       topicDescription,
-      projectId,
-      // committeeID,
-      // userID,
+      projectID: projectId,
+      userID,
+      committeeID,
       isArchived: false,
+      dateCreated: new Date().toISOString(),
     })
     .select()
     .single();
