@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+type RouteParams = { params: Promise<{ projectId: string }> };
+
+export async function POST(req: NextRequest, { params }: RouteParams) {
   const supabase = await createClient();
+  const { projectId } = await params;
 
   const { topicName, topicDescription } = await req.json();
 
@@ -18,8 +21,9 @@ export async function POST(req: NextRequest) {
     .insert({
       topicName,
       topicDescription,
+      projectId,
       // committeeID,
-      // userID: userID,
+      // userID,
       isArchived: false,
     })
     .select()
