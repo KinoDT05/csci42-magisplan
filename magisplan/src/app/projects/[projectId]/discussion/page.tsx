@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Topic = {
@@ -10,14 +10,15 @@ type Topic = {
   dateCreated: string;
 };
 
-export default function DiscussionPage() {
+export default function DiscussionPage({ params }: { params: Promise<{ projectId: string }> } ) {
+  const { projectId } = use(params);
   const router = useRouter();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchTopics = async () => {
-      const res = await fetch("/api/discussion");
+      const res = await fetch(`/api/projects/${projectId}/discussion`);
       const data = await res.json();
       if (!res.ok) { setError(data.error); return; }
       setTopics(data);
@@ -28,12 +29,12 @@ export default function DiscussionPage() {
   return (
     <div>
       <h1>Discussions</h1>
-      <button onClick={() => router.push("/discussion/create")}>+ New Topic</button>
+      <button onClick={() => router.push(`/projects/${projectId}/discussion/create`)}>+ New Topic</button>
       {error && <p>{error}</p>}
       {topics.length === 0 && !error ? <p>No topics found.</p> : (
         <ul>
           {topics.map((topic) => (
-            <li key={topic.topicID} onClick={() => router.push(`/discussion/${topic.topicID}`)}>
+            <li key={topic.topicID} onClick={() => router.push(`/projects/${projectId}/discussion/${topic.topicID}`)}>
               <strong>{topic.topicName}</strong>
               <p>{topic.topicDescription}</p>
               <small>{topic.dateCreated}</small>

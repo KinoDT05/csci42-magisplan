@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
 type Reply = { replyID: number; replyContent: string; dateCreated: string; };
 type Topic = { topicID: number; topicName: string; topicDescription: string; isArchived: boolean; dateCreated: string; replies: Reply[]; };
 
-export default function DiscussionDetailPage() {
+export default function DiscussionDetailPage({ params }: { params: Promise<{ projectId: string }> } ) {
+  const { projectId } = use(params);
   const { slug } = useParams();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [error, setError] = useState("");
@@ -16,7 +17,7 @@ export default function DiscussionDetailPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const fetchTopic = async () => {
-    const res = await fetch(`/api/discussion/${slug}`);
+    const res = await fetch(`/api/projects/${projectId}/discussion/${slug}`);
     const data = await res.json();
     if (!res.ok) { setError(data.error); return; }
     setTopic(data);
