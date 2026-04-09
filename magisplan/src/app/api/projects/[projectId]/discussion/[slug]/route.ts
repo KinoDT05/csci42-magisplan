@@ -1,27 +1,30 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
-type RouteParams = { params: Promise<{ projectId: string, slug: string }> };
+type RouteParams = { params: Promise<{ projectId: string; slug: string }> };
 
 export async function GET(_req: NextRequest, { params }: RouteParams) {
-  const { projectId, slug } = await params;
   const supabase = await createClient();
+  const { projectId, slug } = await params;
   const topicID = Number(slug);
-  
+
   if (isNaN(topicID)) {
     return NextResponse.json({ error: "Invalid topic ID" }, { status: 400 });
   }
 
   const { data: topic, error: topicError } = await supabase
     .from("discussion_topic")
-    .select(`
+    .select(
+      `
       topicID,
       topicName,
       topicDescription,
       isArchived,
       dateCreated
-    `)
+    `
+    )
     .eq("topicID", topicID)
+    .eq("projectId", projectId)
     .single();
 
   if (topicError || !topic) {
@@ -30,12 +33,14 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 
   const { data: replies, error: repliesError } = await supabase
     .from("discussion_reply")
-    .select(`
+    .select(
+      `
       replyID,
       replyContent,
       dateCreated
-    `)
-    .eq("topicID", topic.topicID)
+    `
+    )
+    .eq("topicID", topicID)
     .order("dateCreated", { ascending: true });
 
   if (repliesError) {
@@ -43,15 +48,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
   }
 
   return NextResponse.json({
-    topicID: topic.topicID,
-    topicName: topic.topicName,
-    topicDescription: topic.topicDescription,
-    isArchived: topic.isArchived,
-    dateCreated: topic.dateCreated,
-    replies: (replies ?? []).map((r: any) => ({
-      replyID: r.replyID,
-      replyContent: r.replyContent,
-      dateCreated: r.dateCreated,
-    })),
+    ...topic,
+    replies: replies ?? [],
   });
 }

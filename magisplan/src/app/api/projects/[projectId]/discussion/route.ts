@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+type RouteParams = { params: Promise<{ projectId: string }> };
+
+export async function GET(_req: NextRequest, { params }: RouteParams) {
   const supabase = await createClient();
+  const { projectId } = await params;
 
   const { data, error } = await supabase
     .from("discussion_topic")
@@ -15,6 +18,7 @@ export async function GET() {
       dateCreated
     `
     )
+    .eq("projectId", projectId)
     .eq("isArchived", false)
     .order("dateCreated", { ascending: false });
 
@@ -27,9 +31,6 @@ export async function GET() {
     topicName: row.topicName,
     topicDescription: row.topicDescription,
     isArchived: row.isArchived,
-    committeeID: row.committeeID,
-    committeeName: row.committee?.committeeName ?? null,
-    userName: row.users?.firstName ?? null,
     dateCreated: row.dateCreated,
   }));
 
