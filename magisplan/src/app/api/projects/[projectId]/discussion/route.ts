@@ -12,13 +12,14 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
     .select(
       `
       topicID,
+      projectID,
       topicName,
       topicDescription,
       isArchived,
       dateCreated
     `
     )
-    .eq("projectId", projectId)
+    .eq("projectID", projectId)
     .eq("isArchived", false)
     .order("dateCreated", { ascending: false });
 
