@@ -33,7 +33,11 @@ export default function SidebarLayout({
             </li>
 
             <li>
+<<<<<<< HEAD
               <Link href="/user/dashboard">
+=======
+              <Link href="#">
+>>>>>>> a7d8ed3 (updated how i did sidebar)
                 <img src="/home.svg" width={30} />
                 <span>Home</span>
               </Link>
