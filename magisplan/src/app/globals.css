@@ -41,13 +41,16 @@
 }
 
 body {
-  --sb-width: 6rem;
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-body.sb-expanded {
+.layout {
+  --sb-width: 6rem;
+}
+
+.layout.sb-expanded {
   --sb-width: 12.5rem;
 }
 
@@ -91,8 +94,8 @@ aside {
   opacity: 0;
   visibility: hidden;
   transition:
-    opacity 0.3 ease-in-out,
-    visibility 0.3 ease-in-out;
+    opacity 0.3s ease-in-out,
+    visibility 0.3s ease-in-out;
   display: inline-block;
  }
 
