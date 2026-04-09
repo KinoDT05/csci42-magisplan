@@ -1,7 +1,10 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import SidebarLayout from "@/components/SidebarLayout";
+<<<<<<< HEAD
 import LogoutButton from "@/components/LogoutButton";
+=======
+>>>>>>> 4c81a09 (initial fixes only)
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

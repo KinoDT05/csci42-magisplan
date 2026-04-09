@@ -45,7 +45,7 @@ export default function DiscussionDetailPage() {
   if (!topic) return <p>Loading...</p>;
 
   return (
-    <div>
+    <div className="bg-[#FAF5F5]">
       <h1>{topic.topicName}</h1>
       <small>{topic.dateCreated}</small>
       <p>{topic.topicDescription}</p>
