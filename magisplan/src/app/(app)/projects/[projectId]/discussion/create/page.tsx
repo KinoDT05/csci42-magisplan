@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function CreateDiscussionPage() {
+export default function CreateDiscussionPage({ params }: { params: Promise<{ projectId: string }> }) {
+  const { projectId } = use(params);
   const router = useRouter();
   const [topicName, setTopicName] = useState("");
   const [topicDescription, setTopicDescription] = useState("");
@@ -12,14 +13,14 @@ export default function CreateDiscussionPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const res = await fetch("/api/discussion/create", {
+    const res = await fetch(`/api/projects/${projectId}/discussion/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ topicName, topicDescription }),
     });
     const data = await res.json();
     if (!res.ok) { setError(data.error); return; }
-    router.push("/discussion");
+    router.push(`/projects/${projectId}/discussion`);
   };
 
   return (
