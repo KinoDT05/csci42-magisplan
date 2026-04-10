@@ -12,7 +12,23 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Invalid topic ID" }, { status: 400 });
   }
 
-  const { replyContent, userID } = await req.json();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { data: member, error: memberError } = await supabase
+    .from("project_members")
+    .select("displayName, committeeID, role")
+    .eq("userID", user.id)
+    .eq("projectID", projectId)
+    .single();
+
+  if (memberError || !member) {
+    return NextResponse.json({ error: "Member not found in project" }, { status: 403 });
+  }
+
+  const { replyContent } = await req.json();
 
   if (!replyContent) {
     return NextResponse.json({ error: "replyContent is required" }, { status: 400 });
@@ -23,7 +39,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     .insert({
       topicID,
       replyContent,
-      userID,
+      userID: user.id,
       dateCreated: new Date().toISOString(),
     })
     .select()

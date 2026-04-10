@@ -32,12 +32,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     );
   }
 
-  // console.log("Inserting with:", {
-  //   userID: user.id,
-  //   committeeID: member.committeeID,
-  //   projectID: projectId,
-  // });
-
   const { data, error } = await supabase
     .from("discussion_topic")
     .insert({
@@ -51,9 +45,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     })
     .select()
     .single();
-
-  // console.log("Insert result:", data);
-  // console.log("Insert error:", error);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
