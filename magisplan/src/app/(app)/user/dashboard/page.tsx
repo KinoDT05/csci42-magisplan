@@ -8,6 +8,7 @@ interface Projects {
     targetDate: string;
     projectName: string;
     projectDescription: string;
+    projectID: number;
 }
 
 interface Invites {
@@ -25,47 +26,32 @@ export default function CreateProject() {
     const [loading, setLoading] = useState(true)
 
 
-    const getProjects = async () => {
-
-        const res = await fetch("/api/user/get-projects", {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-        });
-
-        const json = await res.json();
-
-        setProjects(json.data);
-    }
-
-    const getInvites = async () => {
-
-        const res = await fetch("/api/user/get-invites", {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-        });
-
-        const json = await res.json();
-
-        setInvites(json.data);
-    }
+    const getProjects = () => fetch("/api/user/get-projects").then(res => res.json());
+    const getInvites = () => fetch("/api/user/get-invites").then(res => res.json());
 
     const getAll = async () => {
+        const [projects, invites] = await Promise.all([
+            getProjects(),
+            getInvites()
+        ]);
 
-        getProjects();
-        getInvites();
-    }
+        setProjects(projects.data);
+        setInvites(invites.data);
+    };
 
     useEffect(() => {
-        const getUser = async () => {
+        const init = async () => {
             const supabase = await createClient();
-            const { data: { user } } = await supabase.auth.getUser()
-            setUserId(user?.id ?? null)
-            setLoading(false)
-        }
+            const { data: { user } } = await supabase.auth.getUser();
 
-        getUser();
-        getAll();
-    }, [])
+            setUserId(user?.id ?? null);
+
+            await getAll();
+            setLoading(false);
+        };
+
+        init();
+    }, []);
 
     
     if (loading) return <p>Loading...</p>

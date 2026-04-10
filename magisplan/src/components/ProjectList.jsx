@@ -1,27 +1,23 @@
-export default function ProjectList({ projects } ) {
-    const rows = [];
-    console.log(projects);
-    for (let i = 0; i < projects.length; i += 3) {
-        rows.push(projects.slice(i, i + 3));
-    }
+import Link from "next/link";
+
+export default function ProjectList({ projects }) {
     return (
-        <table className="w-full border-separate border-spacing-4">
-            <tbody>
-                {rows.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                        {row.map((item, colIndex) => (
-                            <td key={colIndex} className="p-0 rounded-2xl shadow-md overflow-hidden">
-                                <div className="bg-gray-300 h-32" />
-                                <div className="bg-blue-900 p-3">
-                                    <p className="font-bold text-black text-sm">hi</p>
-                                    <p className="font-bold text-black text-sm">{item.projectName}</p>
-                                    <p className="text-blue-300 text-xs">{item.targetDate}</p>
-                                </div>
-                            </td>
-                        ))}
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+        <div className="grid grid-cols-3 gap-4 p-4">
+            {projects.map((item, index) => (
+                <Link key={index} href={`/projects/${item.projectID}/dashboard`}>
+                <div
+                    
+                    className="rounded-2xl shadow-xl overflow-hidden"
+                >
+                    <div className="bg-gray-300 h-32" />
+                    <div className="bg-blue-900 p-3">
+                        <p className="font-bold text-white text-sm">{item.projectName}</p>
+                        <p className="font-bold text-white text-sm">{item.projectDescription}</p>
+                        <p className="text-blue-300 text-xs">{item.targetDate}</p>
+                    </div>
+                    </div>
+                </Link>
+            ))}
+        </div>
     );
 }

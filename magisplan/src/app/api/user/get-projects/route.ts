@@ -19,6 +19,7 @@ export async function GET() {
     const { data, error: errorInGet } = await supabase
         .from("project_members")
         .select(`projects (
+              projectID,
               projectName,
               projectDescription,
               targetDate
