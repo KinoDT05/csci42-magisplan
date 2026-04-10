@@ -1,7 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import SidebarLayout from "@/components/SidebarLayout";
-import { useState } from "react";
 import LogoutButton from "@/components/LogoutButton";
 
 const geistSans = Geist({
