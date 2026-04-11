@@ -55,6 +55,13 @@ body {
   --sb-width: 12.5rem;
 }
 
+.truncate {
+  max-height: 4.5em;
+  line-height: 1.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 aside {
   position: fixed;
   inset: 0 auto 0 0;

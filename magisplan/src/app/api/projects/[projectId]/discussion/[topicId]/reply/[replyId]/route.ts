@@ -18,20 +18,25 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data: reply } = await supabase
+  const { data: replyData, error: replyError } = await supabase 
     .from("discussion_reply")
     .select("userID")
     .eq("replyID", replyID)
     .eq("topicID", topicID)
     .single();
 
-  if (!reply) {
+  if (replyError || !replyData) {
     return NextResponse.json({ error: "Reply not found" }, { status: 404 });
   }
-
-  if (reply.userID !== user.id) {
+  if (replyData.userID !== user.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+
+  const { data: memberData } = await supabase
+  .from("project_members")
+  .select("displayName")
+  .eq("userID", replyData.userID)
+  .single();
 
   const { replyContent } = await req.json();
 
@@ -48,7 +53,11 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({
+    success: true,
+    displayName: memberData?.displayName ?? "Unknown",
+    replyContent,
+  });
 }
 
 export async function DELETE(_req: NextRequest, { params }: RouteParams) {

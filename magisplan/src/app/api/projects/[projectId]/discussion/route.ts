@@ -35,6 +35,11 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
         .eq("projectID", projectId)
         .single();
 
+      const { count } = await supabase
+        .from("discussion_reply")
+        .select("*", { count: "exact", head: true })
+        .eq("topicID", row.topicID);
+
       return {
         topicID: row.topicID,
         topicName: row.topicName,
@@ -43,6 +48,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
         dateCreated: row.dateCreated,
         userID: row.userID,
         author: author ?? null,
+        replyCount: count ?? 0,
       };
     })
   );

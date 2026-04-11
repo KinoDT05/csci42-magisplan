@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
-type Reply = { replyID: number; replyContent: string; dateCreated: string; };
+type Reply = { replyID: number; replyContent: string; dateCreated: string; displayName: string; };
 type Topic = { topicID: number; topicName: string; topicDescription: string; isArchived: boolean; dateCreated: string; replies: Reply[]; };
 
 export default function DiscussionDetailPage({ params }: { params: Promise<{ projectId: string; topicId: string }> } ) {
@@ -44,13 +44,22 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ pro
 
   if (error) return <p>{error}</p>;
   if (!topic) return <p>Loading...</p>;
+  console.log(topic.replies);
 
   return (
-    <div className="bg-[#f5f5f5] w-ful min-h-screen -mx-8 -my-4 p-7">
+    <div className="bg-[#f5f5f5] w-ful min-h-screen -mx-8 -my-4 p-7 flex flex-col">
+      <div className="mx-10">
+        <Link href={`/projects/${projectId}/discussion`}>
+          <img src="/back.svg" width={50} />
+        </Link>
+      </div>
+      
+      
+      
       <div className="rounded-md shadow bg-white items-center mx-20 ml-30 p-7">
 
         {/*topic information */}
-         <p className="text-xs text-[var(--txt-gray)]">temp asked on 
+         <p className="text-xs text-[var(--txt-gray)]">{topic.author?.displayName ?? "Unknown"} asked on 
                   {(() => {
                     const date = new Date(topic.dateCreated);
                     const month = date.toLocaleString("en-US", { month: "long" });
@@ -62,7 +71,10 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ pro
                 <strong className="text-2xl">{topic.topicName}</strong>
                 <p className="text-lg text-[var(--txt-gray)] mt-3">{topic.topicDescription}</p>
         
-        <h2>Replies ({topic.replies.length})</h2>
+        <div className="flex flex-row items-center  mt-5 mx-2">
+          <img src="/reply.svg" width={35} />
+          <p className="text-lg px-3">{topic.replies.length}</p>
+        </div>
 
         <div className = "px-5">
            {/*add reply */}
@@ -73,9 +85,21 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ pro
             <ul>
               {topic.replies.map((reply) => (
                 <li key={reply.replyID}>
-                  {reply.replyContent}
+                  <div className="flex flex-row items-center gap-6">
+                    <p className="font-semibold text-sm">{reply.author?.displayName ?? "Unknown"}</p>
+                    <p className="text-xs text-[var(--txt-gray)]">{(() => {
+                      const date = new Date(reply.dateCreated);
+                      const month = date.toLocaleString("en-US", { month: "long" });
+                      const day = date.getDate();
+                      const year = date.getFullYear();
+                      return ` ${month} ${day}, ${year}`;
+                    })()}</p>
+                  </div>
+                  
+                  <div className="text-lg text-[var(--txt-gray)]">{reply.replyContent}</div>
                   <br />
-                  <small>{reply.dateCreated}</small>
+                  
+          
                 </li>
               ))}
             </ul>
@@ -98,7 +122,6 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ pro
             </div>
           </div>
           )}
-          <Link href={`/projects/${projectId}/discussion`}>Go back</Link>
         </div>
        
       </div>
