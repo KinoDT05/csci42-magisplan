@@ -11,7 +11,7 @@ type ProjectInfo = {
 type MembershipRow = {
   projectID: number;
   role: string;
-  projects: ProjectInfo[] | null;
+  projects: ProjectInfo | ProjectInfo[] | null;
 };
 
 export async function GET(_request: NextRequest, context: { params: Promise<{ username: string }> }) {
@@ -77,7 +77,11 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ us
       );
     }
     
-    const typedMemberships = (memberships ?? []) as MembershipRow[];
+    const typedMemberships: MembershipRow[] = (memberships ?? []).map((member: any) => ({
+        projectID: member.projectID,
+        role: member.role,
+        projects: member.projects,
+    }));
     
     const fullName = [
       user.firstName,
@@ -87,12 +91,19 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ us
       .filter(Boolean)
       .join(" ");
     
-    // map() goes through each item of typedMembership array and returns a new array
+    console.log("[GET profile by username] memberships raw:", memberships);
+    console.log("[GET profile by username] first membership:", memberships?.[0]);
+    console.log("[GET profile by username] first membership projects:", memberships?.[0]?.projects);
+
     const formattedProjects = typedMemberships.map((member) => ({
-      projectID: member.projectID,
-      projectName: member.projects?.[0]?.projectName ?? "",
-      role: member.role,
+    projectID: member.projectID,
+    projectName: Array.isArray(member.projects)
+        ? member.projects[0]?.projectName ?? ""
+        : member.projects?.projectName ?? "",
+    role: member.role,
     }));
+
+    console.log("[GET profile by username] formattedProjects:", formattedProjects);
 
     return NextResponse.json(
       {
