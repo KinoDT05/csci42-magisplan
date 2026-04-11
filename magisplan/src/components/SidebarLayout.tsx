@@ -65,7 +65,7 @@ export default function SidebarLayout({
             </li>
 
             <li>
-              <Link href={userId ? `/profile/${userId}` : "#"}>
+              <Link href={username ? `/profile/${username}` : "#"}>
                 <img src="/profile.svg" width={30} />
                 <span>Profile</span>
               </Link>

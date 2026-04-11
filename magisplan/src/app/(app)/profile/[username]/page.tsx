@@ -1,55 +1,62 @@
 "use client";
 
-import { createClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+type ProfileData = {
+  userID: string;
+  fullName: string;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  emailAddress: string;
+  contactNumber: string;
+  username: string;
+  projects: {
+    projectID: number;
+    projectName: string;
+    role: string;
+  }[];
+};
 
 export default function ProfilePage() {
   const params = useParams();
   const username = params.username as string;
 
   const [user, setUser] = useState<any>(null);
-  const [projectsData, setProjectsData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("userID, firstName, lastName, contactNumber, username")
-        .eq("username", username)
-        .single();
+      try {
+        console.log("[ProfilePage] username param:", username);
 
-      if (userError) {
-        console.error("User error:", userError);
-        return;
-      }
+        setLoading(true);
 
-      setUser(userData);
+        const response = await fetch(`/api/profile/username/${username}`);
+        const result = await response.json();
 
-      const { data: projectData, error: projectError } = await supabase
-        .from("project_members")
-        .select(`
-          role,
-          projects (
-            projectName
-          )
-        `)
-        .eq("userID", userData.userID);
+        console.log("[ProfilePage] response status:", response.status);
+        console.log("[ProfilePage] response data:", result);
 
-      if (projectError) {
-        console.error("Projects error:", projectError);
-      } else {
-        setProjectsData(projectData || []);
+        if (!response.ok) {
+          console.error("[ProfilePage] fetch failed:", result.error);
+          setUser(null);
+          return;
+        }
+
+        setUser(result);
+      } catch (error) {
+        console.error("[ProfilePage] unexpected error:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData();
+    if (username) {
+      fetchData();
+    }
   }, [username]);
 
   return (
@@ -64,7 +71,9 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex flex-col justify-center text-[var(--main)]">
-            {user ? (
+            {loading ? (
+              <p>Loading...</p>
+            ) : user ? (
               <>
                 <p className="font-semibold text-5xl">
                   {user.firstName} {user.lastName}
@@ -73,7 +82,7 @@ export default function ProfilePage() {
                 <p className="text-2xl">{user.contactNumber}</p>
               </>
             ) : (
-              <p>Loading...</p>
+              <p>User not found.</p>
             )}
           </div>
         </div>
@@ -85,7 +94,6 @@ export default function ProfilePage() {
             </div>
           </Link>
         </div>
-
       </div>
 
       {/* header */}
@@ -102,19 +110,27 @@ export default function ProfilePage() {
       {/* list */}
       <div className="flex gap-6">
         <div className="w-2/3 bg-[#E6E6E6] rounded-xl p-5 shadow-md text-center">
-          {projectsData.map((item, index) => (
-            <div key={index} className="mb-2">
-              {item.projects?.projectName}
-            </div>
-          ))}
+          {user?.projects?.length ? (
+            user.projects.map((item: any, index: number) => (
+              <div key={index} className="mb-2">
+                {item.projectName}
+              </div>
+            ))
+          ) : (
+            <p>No projects found.</p>
+          )}
         </div>
 
         <div className="w-1/3 bg-[#E6E6E6] rounded-xl p-5 shadow-md text-center">
-          {projectsData.map((item, index) => (
-            <div key={index} className="mb-2">
-              {item.role}
-            </div>
-          ))}
+          {user?.projects?.length ? (
+            user.projects.map((item: any, index: number) => (
+              <div key={index} className="mb-2">
+                {item.role}
+              </div>
+            ))
+          ) : (
+            <p>No roles found.</p>
+          )}
         </div>
       </div>
 
