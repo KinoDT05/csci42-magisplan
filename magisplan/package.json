@@ -14,10 +14,7 @@
     "@supabase/supabase-js": "^2.97.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
-<<<<<<< HEAD
     "framer-motion": "^12.38.0",
-=======
->>>>>>> a7d8ed3 (updated how i did sidebar)
     "next": "^16.2.3",
     "react": "19.2.3",
     "react-dom": "19.2.3"

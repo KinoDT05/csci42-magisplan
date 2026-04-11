@@ -11,11 +11,29 @@ export default function SidebarLayout({
 }) {
   const [expanded, setExpanded] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [username, setUsername] = useState<string>("");
 
   useEffect(() => {
     const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUserId(data.user?.id ?? null);
+      const { data: authData } = await supabase.auth.getUser();
+
+      const id = authData.user?.id ?? null;
+      setUserId(id);
+
+      if (!id) return;
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("username")
+        .eq("userID", id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching username:", error);
+        return;
+      }
+
+      setUsername(data.username);
     };
 
     getUser();
@@ -33,11 +51,7 @@ export default function SidebarLayout({
             </li>
 
             <li>
-<<<<<<< HEAD
               <Link href="/user/dashboard">
-=======
-              <Link href="#">
->>>>>>> a7d8ed3 (updated how i did sidebar)
                 <img src="/home.svg" width={30} />
                 <span>Home</span>
               </Link>
@@ -51,7 +65,7 @@ export default function SidebarLayout({
             </li>
 
             <li>
-              <Link href={userId ? `/profile/${userId}` : "#"}>
+              <Link href={userId ? `/profile/${username}` : "#"}>
                 <img src="/profile.svg" width={30} />
                 <span>Profile</span>
               </Link>
