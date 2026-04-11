@@ -43,6 +43,10 @@
   .btn-secondary {
     @apply inline-block px-10 py-2 rounded-lg text-white bg-[var(--dark-gray)] hover:opacity-90 transition cursor-pointer; 
   }
+
+  .btn-secondary {
+    @apply inline-block px-10 py-2 rounded-lg text-white bg-[var(--dark-gray)] hover:opacity-90 transition;
+  }
 }
 
 body {

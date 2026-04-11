@@ -14,7 +14,10 @@
     "@supabase/supabase-js": "^2.97.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
+<<<<<<< HEAD
     "framer-motion": "^12.38.0",
+=======
+>>>>>>> 78ab0e5164a69ac64c4a44415433baad7e9c0675
     "next": "^16.2.3",
     "react": "19.2.3",
     "react-dom": "19.2.3"
