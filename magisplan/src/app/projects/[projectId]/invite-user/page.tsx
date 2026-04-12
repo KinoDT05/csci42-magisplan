@@ -30,26 +30,33 @@ export default function CreateProject({ params }: { params: Promise<{ projectId:
     
     useEffect(() => {
         const supabase = createClient();
-        const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            setUserId(user?.id ?? null)
-            setLoading(false)
-        }
+        
+        const init = async () => {
+            try {
+                const [userRes, committeeRes] = await Promise.all([
+                    supabase.auth.getUser(),
+                    supabase
+                        .from("committee")
+                        .select("committeeID, committeeName")
+                        .eq("projectID", projectId)
+                ]);
 
-        const fetchCommittees = async () => {
-            const { data, error } = await supabase
-                .from("committee")
-                .select("committeeID, committeeName")
-                .eq("projectID", projectId);
+                const user = userRes.data?.user;
+                setUserId(user?.id ?? null);
 
-            if (!error) {
-                setCommittees(data);
+                if (!committeeRes.error) {
+                    setCommittees(committeeRes.data);
+                }
+
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchCommittees();
-        getUser()
-    }, [])
+        init();
+    }, []);
 
     const handleNumInviteChange = (n: number) => {
         setNumInvites(n);

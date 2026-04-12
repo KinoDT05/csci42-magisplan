@@ -15,7 +15,6 @@ export async function GET() {
 
     const userID = userData.user.id;
     
-
     const { data, error: errorInGet } = await supabase
         .from("project_members")
         .select(`projects (

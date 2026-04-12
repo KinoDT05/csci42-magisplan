@@ -6,8 +6,10 @@ import Link from "next/link";
 
 export default function SidebarLayout({
   children,
+  mainClassName = "",
 }: {
   children: React.ReactNode;
+  mainClassName?: string;
 }) {
   const [expanded, setExpanded] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -88,7 +90,7 @@ export default function SidebarLayout({
         </nav>
       </aside>
 
-      <main>{children}</main>
+      <main className={mainClassName}>{children}</main>
     </div>
   );
 }

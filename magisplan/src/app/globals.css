@@ -47,6 +47,21 @@
   .btn-secondary {
     @apply inline-block px-10 py-2 rounded-lg text-white bg-[var(--dark-gray)] hover:opacity-90 transition;
   }
+
+  .task-table-header {
+    @apply grid grid-cols-6 bg-[#e0e0e0] rounded-full px-8 py-4 text-sm font-bold text-center text-gray-800 shadow-sm border border-gray-200;
+  }
+  .task-table-row {
+    @apply grid grid-cols-6 px-5 py-3 text-sm text-center items-center rounded-xl hover:bg-[#e0e0e0] transition-colors;
+  }
+
+  .badge-pill {
+    @apply font-bold px-4 py-1.5 rounded-full text-[10px] uppercase shadow-sm whitespace-nowrap w-full max-w-[120px] mx-auto block text-center;
+  }
+  .badge-red { @apply bg-[#ebc4c4] text-[#a82525]; }
+  .badge-yellow { @apply bg-yellow-200 text-yellow-800; }
+  .badge-green { @apply bg-[#c3e6d5] text-[#1f5235]; }
+  .badge-gray { @apply bg-gray-200 text-gray-600; }
 }
 
 body {
@@ -134,5 +149,6 @@ aside {
   margin-left: var(--sb-width);
   padding: 1rem 2rem;
   transition: margin-left 0.5s ease-in-out;
+  min-height: 100vh;
  }
 
