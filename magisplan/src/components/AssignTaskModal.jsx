@@ -90,7 +90,7 @@ export default function AssignTaskModal({ taskID, taskName, manpowerRequired, co
                 className="bg-[var(--main)] rounded-lg p-1 text-white"
                 onClick={() => setIsOpen(true)}
             >
-                Assign Task
+                Assign
             </button>
 
             <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title={`Assign: ${taskName}`}>

@@ -16,7 +16,7 @@ export default function TaskPage() {
     const [committees, setCommittees] = useState([]);
     const [tasks, setTasks] = useState([]);
     const [committeeTask, setCommitteeTask] = useState("");
-
+    const [userID, setUserID] = useState("");
     // 1. Initial Load: User data and Committee list
     useEffect(() => {
         const supabase = createClient();
@@ -35,7 +35,7 @@ export default function TaskPage() {
                 if (data) {
                     setCommitteeOfUser(data.committee.committeeName);
                     setRoleOfUser(data.role);
-
+                    setUserID(user.id)
                 } 
 
                 const { data: committeeData, error } = await supabase
@@ -115,7 +115,7 @@ export default function TaskPage() {
                 ) : (
 
                         tasks.map((task, index) => (
-                            <TaskCard key={task.taskID} task={task} num={index} userRole={roleOfUser} userComm={committeeOfUser} onRefresh={fetchTasks} />
+                            <TaskCard key={task.taskID} task={task} num={index} userRole={roleOfUser} userComm={committeeOfUser} userID={userID } onRefresh={fetchTasks} />
                 ))
             )}
         </div>

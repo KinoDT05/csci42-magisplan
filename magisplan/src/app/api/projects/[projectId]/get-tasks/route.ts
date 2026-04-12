@@ -55,7 +55,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                         committeeName
                     )
                 `)
-                .eq("projectID", projectID);
+                .eq("projectID", projectID).order("hardDeadline", { ascending: true });
 
             if (error) {
                 console.error("Supabase error:", error);
@@ -85,7 +85,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                     )
                   `)
                 .eq("projectID", projectID)
-                .eq("tasks_assignment.userID", userID);
+                .eq("tasks_assignment.userID", userID).order("hardDeadline", { ascending: true });
             if (error) {
                 console.error("Supabase error:", error);
                 return NextResponse.json({ error: error.message }, { status: 500 });
@@ -151,7 +151,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                     )
           `)
                 .eq("projectID", projectID)
-                .eq("committeeID", committeeID);
+                .eq("committeeID", committeeID).order("hardDeadline", { ascending: true });
 
             if (error) {
                 console.error("Supabase error:", error);
@@ -188,7 +188,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                 committeeName
                     )
           `)
-                .eq("projectID", projectID);
+                .eq("projectID", projectID).order("hardDeadline", { ascending: true });
 
             if (error) {
                 console.error("Supabase error:", error);
@@ -209,16 +209,22 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                     .join(", ")
                 : "None";
 
-            const { tasks_assignment, ...rest } = task;
+            const userIDs = task.tasks_assignment?.length
+                ? task.tasks_assignment.map(ta => ta.userID).filter(Boolean)
+                : [];
+
+            const { tasks_assignment, committee, ...rest } = task;
 
             return {
                 ...rest,
                 blastDate: rest.blastDate ?? "None",
-                committeeID: rest.committee?.committeeID,
-                committeeName: rest.committee?.committeeName,
-                assignedPerson: names
+                committeeID: committee?.committeeID ?? null,
+                committeeName: committee?.committeeName ?? "None",
+                assignedPerson: names,
+                assignedUserIDs: userIDs, // ✅ ["uuid1", "uuid2"]
             };
         });
+
 
         return new Response(
             JSON.stringify({ data: mapped }),
