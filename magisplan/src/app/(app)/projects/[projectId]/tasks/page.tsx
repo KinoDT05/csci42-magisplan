@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from '@/lib/supabase/client';
 import { useParams } from "next/navigation";
 import AddTaskModal from "@/components/AddTaskModal";
+import TaskCard from "@/components/TaskCard";
 
 export default function TaskPage() {
     const params = useParams();
@@ -66,40 +67,48 @@ export default function TaskPage() {
     }, [projectID, committeeTask]); 
 
     return (
-        <div>
-            {!loading && committeeOfUser && (
-                <AddTaskModal committeeOfAdder={committeeOfUser} />
-            )}
+        <div className="bg-[#f5f5f5] w-ful min-h-screen -mx-8 -my-4 p-7">
 
-            <select
-                value={committeeTask}
-                onChange={(e) => setCommitteeTask(e.target.value)}
-            >
-                <option value="">All</option>
-                {committees.map((committee) => (
-                    <option key={committee.committeeID} value={committee.committeeID}>
-                        {committee.committeeName}
-                    </option>
-                ))}
-            </select>
+            {/* create task and filtering */}
+            <div className="flex my-5">
+                {!loading && committeeOfUser && (
+                    <AddTaskModal committeeOfAdder={committeeOfUser} />
+                )}
 
+                <select
+                    value={committeeTask}
+                    onChange={(e) => setCommitteeTask(e.target.value)} className="border text-[var(--main)] ml-auto font-bold"
+                >
+                    <option value="">All</option>
+                    {committees.map((committee) => (
+                        <option key={committee.committeeID} value={committee.committeeID}>
+                            {committee.committeeName}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            
+            {/* header */}
+            <div className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_1fr_0.25fr] gap-4 bg-white shadow-lg font-semibold items-center text-md rounded-lg px-2 py-3 mb-5">
+                <div>Task</div>
+                <div>Assigned To</div>
+                <div>Soft Deadline</div>
+                <div>Hard Deadline</div>
+                <div>Blast Date</div>
+                <div>Priority</div>
+                <div>Status</div>
+                <div>Edit</div>
+            </div>
+            
+            {/* task details */}
             {tasksLoading ? (
                 <p>Loading tasks...</p>
             ) : tasks.length === 0 ? (
                 <p>No tasks found.</p>
                 ) : (
 
-                // can you like make this a component because i still need to add more backend stuff to it 
                 tasks.map((task) => (
-                    <div key={task.taskID}>
-                        <h3>{task.taskName}</h3>
-                        <p>Status: {task.status}</p>
-                        <p>Priority: {task.priority}</p>
-                        <p>Assigned To: {task.assignedPerson}</p>
-                        <p>Soft Deadline: {task.softDeadline ?? "None"}</p>
-                        <p>Hard Deadline: {task.hardDeadline ?? "None"}</p>
-                        <p>Blast Date: {task.blastDate}</p>
-                    </div>
+                    <TaskCard key={task.taskID} task={task} />
                 ))
             )}
         </div>
