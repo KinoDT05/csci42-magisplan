@@ -86,26 +86,29 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
         taskData = data;
     }
     
-
-    
-
     const mapped = taskData?.map(task => {
-        const names = task.tasks_assignment?.length
-            ? task.tasks_assignment
-                .map(ta => {
-                    const user = ta.users;
-                    return user ? `${user.firstName} ${user.lastName}` : null;
-                })
+        const assignedUsers = task.tasks_assignment?.length
+            ? task.tasks_assignment.map(ta => ta.users)
+            : [];
+            
+        const names = assignedUsers.length
+            ? assignedUsers
+                .map(user => user ? `${user.firstName} ${user.lastName}` : null)
                 .filter(Boolean)
                 .join(", ")
             : "None";
-
+        
+        const userIDs = task.tasks_assignment?.length
+            ? task.tasks_assignment.map(ta => ta.userID)
+            : [];
+        
         const { tasks_assignment, ...rest } = task;
-
+        
         return {
             ...rest,
             blastDate: rest.blastDate ?? "None",
-            assignedPerson: names
+            assignedPerson: names,
+            assignedUserIDs: userIDs
         };
     });
 
