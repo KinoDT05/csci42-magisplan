@@ -183,9 +183,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
             taskData = data;
         }
 
-
-
-
         const mapped = taskData?.map(task => {
             const names = task.tasks_assignment?.length
                 ? task.tasks_assignment
@@ -207,12 +204,5 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                 assignedPerson: names
             };
         });
-
-
-        return new Response(
-            JSON.stringify({ data: mapped }),
-            { status: 201 }
-        );
     }
-    
 }
