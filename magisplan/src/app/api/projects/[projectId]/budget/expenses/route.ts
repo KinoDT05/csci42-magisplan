@@ -41,6 +41,7 @@ function validateExpenseInput(body: {
   return null;
 }
 
+// gets all expense entries of the project
 export async function GET(_request: NextRequest, context: { params: Promise<{ projectId: string }> }) {
   try {
     const supabase = await createClient();
@@ -69,22 +70,31 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pr
       .eq("projectID", parsedProjectId)
       .eq("transactionType", "expense")
       .order("dateRecorded", { ascending: false });
+    
+    console.log("expenses route error:", error);
+    console.log("raw expenses query result:", JSON.stringify(data, null, 2));
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const formatted = (data ?? []).map((row) => ({
-      transactionID: row.transactionID,
-      projectID: row.projectID,
-      amount: row.amount,
-      description: row.description,
-      dateRecorded: row.dateRecorded,
-      paymentStatus: row.paymentStatus,
-      transactionType: row.transactionType,
-      payee: row.expenses?.[0]?.payee ?? null,
-      expenseType: row.expenses?.[0]?.expenseType ?? null,
-    }));
+    const formatted = (data ?? []).map((row) => {
+      const expense = Array.isArray(row.expenses)
+        ? row.expenses[0]
+        : row.expenses;
+
+      return {
+        transactionID: row.transactionID,
+        projectID: row.projectID,
+        amount: row.amount,
+        description: row.description,
+        dateRecorded: row.dateRecorded,
+        paymentStatus: row.paymentStatus,
+        transactionType: row.transactionType,
+        payee: expense?.payee ?? null,
+        expenseType: expense?.expenseType ?? null,
+      };
+    });
 
     return NextResponse.json(formatted);
   } catch (err) {
@@ -96,6 +106,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pr
   }
 }
 
+// adds a new expense entry to the project
 export async function POST(request: NextRequest, context: { params: Promise<{ projectId: string }> }) {
   try {
     const supabase = await createClient();
