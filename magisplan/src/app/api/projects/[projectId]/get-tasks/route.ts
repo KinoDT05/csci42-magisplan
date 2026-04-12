@@ -120,6 +120,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
             blastDate,
             priority,
             status,
+            manpowerRequired,
             tasks_assignment (
               userID,
               users (
@@ -128,7 +129,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                 lastName,
                 username
               )
-            )
+            ),
+            committee (
+                committeeID,
+                committeeName
+                    )
           `)
                 .eq("projectID", projectID)
                 .eq("committeeID", committeeID);
@@ -153,6 +158,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
             blastDate,
             priority,
             status,
+            manpowerRequired,
             tasks_assignment (
               userID,
               users (
@@ -161,7 +167,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                 lastName,
                 username
               )
-            )
+            ),
+            committee (
+                committeeID,        
+                committeeName
+                    )
           `)
                 .eq("projectID", projectID);
 
@@ -192,6 +202,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
             return {
                 ...rest,
                 blastDate: rest.blastDate ?? "None",
+                committeeID: rest.committee?.committeeID,
+                committeeName: rest.committee?.committeeName,
                 assignedPerson: names
             };
         });

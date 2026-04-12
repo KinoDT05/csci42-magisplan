@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useParams } from "next/navigation";
 import Modal from "@/components/Modal";
 
-export default function AddTaskModal({ committeeOfAdder }) {
+export default function AddTaskModal({ committeeOfAdder, onRefresh }) {
     const params = useParams();
     const projectID = params.projectId;
     const [isOpen, setIsOpen] = useState(false);
@@ -66,7 +66,8 @@ export default function AddTaskModal({ committeeOfAdder }) {
 
             if (response.ok) {
                 setResponseStatus({ success: true, message: "Task created successfully!" });
-                setIsOpen(false); // Close the input modal
+                setIsOpen(false);
+                onRefresh();// Close the input modal
             } else {
                 setResponseStatus({ success: false, message: result.error || "Failed to create task." });
             }
@@ -124,7 +125,7 @@ export default function AddTaskModal({ committeeOfAdder }) {
     return (
         <div>
             <button
-                className="bg-blue-900 text-white px-4 py-2 rounded"
+                className="bg-[var(--main)] rounded-lg p-1 text-white"
                 onClick={() => setIsOpen(true)}
             >
                 Create Task

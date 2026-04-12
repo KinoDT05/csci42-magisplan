@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from '@/lib/supabase/client';
 import { useParams } from "next/navigation";
 import AddTaskModal from "@/components/AddTaskModal";
@@ -12,6 +12,7 @@ export default function TaskPage() {
     const [loading, setLoading] = useState(true);
     const [tasksLoading, setTasksLoading] = useState(false);
     const [committeeOfUser, setCommitteeOfUser] = useState(null);
+    const [roleOfUser, setRoleOfUser] = useState("");
     const [committees, setCommittees] = useState([]);
     const [tasks, setTasks] = useState([]);
     const [committeeTask, setCommitteeTask] = useState("");
@@ -26,12 +27,16 @@ export default function TaskPage() {
 
                 const { data } = await supabase
                     .from("project_members")
-                    .select(`committee ( committeeName )`)
+                    .select(`committee ( committeeName ), role`)
                     .eq("userID", user.id)
                     .eq("projectID", projectID)
                     .single();
 
-                if (data) setCommitteeOfUser(data.committee.committeeName);
+                if (data) {
+                    setCommitteeOfUser(data.committee.committeeName);
+                    setRoleOfUser(data.role);
+
+                } 
 
                 const { data: committeeData, error } = await supabase
                     .from("committee")
@@ -49,22 +54,24 @@ export default function TaskPage() {
     }, [projectID]);
 
     // 2. Task Fetching: Runs when projectID or committeeTask changes
+    const fetchTasks = useCallback(async () => {
+        setTasksLoading(true);
+        try {
+            const res = await fetch(`/api/projects/${projectID}/get-tasks?committee=${committeeTask}`);
+            const json = await res.json();
+            setTasks(json.data || []);
+        } catch (err) {
+            console.error("Task fetch error:", err);
+        } finally {
+            setTasksLoading(false);
+        }
+    }, [projectID, committeeTask]);
+
     useEffect(() => {
         if (!projectID) return;
-        const fetchTasks = async () => {
-            setTasksLoading(true);
-            try {
-                const res = await fetch(`/api/projects/${projectID}/get-tasks?committee=${committeeTask}`);
-                const json = await res.json();
-                setTasks(json.data || []);
-            } catch (err) {
-                console.error("Task fetch error:", err);
-            } finally {
-                setTasksLoading(false);
-            }
-        };
         fetchTasks();
-    }, [projectID, committeeTask]); 
+    }, [projectID, committeeTask, fetchTasks]);
+ 
 
     return (
         <div className="bg-[#f5f5f5] w-ful min-h-screen -mx-8 -my-4 p-7">
@@ -72,7 +79,7 @@ export default function TaskPage() {
             {/* create task and filtering */}
             <div className="flex my-5">
                 {!loading && committeeOfUser && (
-                    <AddTaskModal committeeOfAdder={committeeOfUser} />
+                    <AddTaskModal committeeOfAdder={committeeOfUser} onRefresh={fetchTasks} />
                 )}
 
                 <select
@@ -107,8 +114,8 @@ export default function TaskPage() {
                 <p>No tasks found.</p>
                 ) : (
 
-                tasks.map((task) => (
-                    <TaskCard key={task.taskID} task={task} />
+                        tasks.map((task, index) => (
+                            <TaskCard key={task.taskID} task={task} num={index} userRole={roleOfUser} userComm={committeeOfUser} onRefresh={fetchTasks} />
                 ))
             )}
         </div>
