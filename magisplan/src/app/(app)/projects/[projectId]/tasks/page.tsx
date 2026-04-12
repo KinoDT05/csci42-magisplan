@@ -42,7 +42,7 @@ export default function TaskPage() {
                     .from("committee")
                     .select("committeeID, committeeName")
                     .eq("projectID", projectID);
-
+                console.log(committeeData)
                 if (!error) setCommittees(committeeData);
             } catch (err) {
                 console.error("Fetch error:", err);

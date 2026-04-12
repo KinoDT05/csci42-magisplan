@@ -10,6 +10,7 @@ interface Task {
     taskID: number;
     taskName: string;
     committeeID: number;
+    committeeName: string;
     hardDeadline: string;
     priority: string;
     status: string;
@@ -60,21 +61,10 @@ export default function Dashboard() {
     };
     
     const getTasks = async () => {
-        const res = await fetch(`/api/projects/${projectID}/get-tasks`);
+        const res = await fetch(`/api/projects/${projectID}/get-tasks?filter=${filter}`);
         const data = await res.json();
         setTasks(data.data || []);
     };
-    
-    useEffect(() => {
-        let result = tasks;
-
-        if (filter === "mine" && userId) {
-            result = tasks.filter(task =>
-                task.assignedUserIDs?.includes(userId)
-            );
-        }
-        setFilteredTasks(result);
-    }, [tasks, filter, userId]);
     
     useEffect(() => {
         if (!project?.targetDate) return;
@@ -99,7 +89,7 @@ export default function Dashboard() {
         };
         
         init();
-    }, [projectID]);
+    }, [projectID, filter]);
     
     const formatDate = (dateString?: string) => {
         if (!dateString) return "";
@@ -206,14 +196,14 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="bg-[#ebebeb] rounded-[1.5rem] p-3 space-y-2 shadow-inner">
-                        {filteredTasks.length === 0 ? (
+                        {tasks.length === 0 ? (
                             <p className="p-6 text-sm text-gray-500 text-center">No tasks found.</p>
                         ) : (
-                            filteredTasks.map((task) => (
+                                    tasks.map((task) => (
                             <div key={task.taskID} className="task-table-row">
                                 <div>
                                     <span className="badge-pill badge-green truncate px-3">
-                                        {task.committeeID === 11 ? "SECRETARIAT" : `COMM ${task.committeeID}`}
+                                        {task.committeeName}
                                     </span>
                                 </div>
                                 <p className="text-gray-700">{task.assignedPerson || "None"}</p>

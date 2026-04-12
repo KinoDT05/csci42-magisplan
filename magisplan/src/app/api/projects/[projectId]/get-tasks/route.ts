@@ -17,11 +17,24 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
     const committee = searchParams.get('committee');
     const committeeID = committee ? Number(committee) : null;
 
-    const userID = searchParams.get('userID');
+    const filter = searchParams.get('filter');
     let taskData = null;
 
-    if (userID) {
-        if (userID == "All") {
+    console.log(filter);
+    const { data: userData, error } = await supabase.auth.getUser();
+
+    if (!userData.user) {
+        return NextResponse.json(
+            { error: "User does not exist" },
+            { status: 400 }
+        );
+    }
+
+    const userID = userData.user.id;
+
+
+    if (filter) {
+        if (filter == "all") {
             const { data, error } = await supabase
                 .from("tasks")
                 .select(`
@@ -37,7 +50,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                         lastName,
                         username
                       )
-                    )
+                    ),
                     committee (
                         committeeName
                     )
@@ -81,23 +94,25 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
             taskData = data;
         }
 
-        const mapped = taskData?.map(({ tasks_assignment, committee, ...rest }) => {
-            const assignedPerson = tasks_assignment?.length
-                ? tasks_assignment
-                    .map(ta => ta.users
-                        ? `${ta.users.firstName} ${ta.users.lastName}`
-                        : null
-                    )
+        const mapped = taskData?.map(task => {
+            const names = task.tasks_assignment?.length
+                ? task.tasks_assignment
+                    .map(ta => {
+                        const user = ta.users;
+                        return user ? `${user.firstName} ${user.lastName}` : null;
+                    })
                     .filter(Boolean)
                     .join(", ")
                 : "None";
 
+            const { tasks_assignment, committee, ...rest } = task;
+
             return {
                 ...rest,
-                hardDeadline: rest.hardDeadline ?? "None",
                 committeeName: committee?.committeeName ?? "None",
-                assignedPerson
+                assignedPerson: names
             };
+
         });
 
         return new Response(
@@ -204,5 +219,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                 assignedPerson: names
             };
         });
+
+        return new Response(
+            JSON.stringify({ data: mapped }),
+            { status: 201 }
+        );
     }
+
+    
 }
