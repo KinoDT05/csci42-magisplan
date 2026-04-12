@@ -50,6 +50,7 @@
 }
 
 body {
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
@@ -61,6 +62,13 @@ body {
 
 .layout.sb-expanded {
   --sb-width: 12.5rem;
+}
+
+.truncate {
+  max-height: 4.5em;
+  line-height: 1.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 aside {
