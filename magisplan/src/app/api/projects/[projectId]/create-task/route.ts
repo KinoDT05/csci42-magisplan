@@ -68,6 +68,7 @@ export async function POST(
                 blastDate: hasBlastDate ? blastDate : null,
                 manpowerRequired: Number(manpowerRequired),
                 priority: priority,
+                status: "NotStarted",
             },
         ])
         .select();
