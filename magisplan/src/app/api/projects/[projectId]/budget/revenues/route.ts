@@ -75,17 +75,23 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pr
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const formatted = (data ?? []).map((row) => ({
-      transactionID: row.transactionID,
-      projectID: row.projectID,
-      amount: row.amount,
-      description: row.description,
-      dateRecorded: row.dateRecorded,
-      paymentStatus: row.paymentStatus,
-      transactionType: row.transactionType,
-      payer: row.revenues?.[0]?.payer ?? null,
-      revenueType: row.revenues?.[0]?.revenueType ?? null,
-    }));
+    const formatted = (data ?? []).map((row) => {
+      const revenue = Array.isArray(row.revenues)
+        ? row.revenues[0]
+        : row.revenues;
+
+      return {
+        transactionID: row.transactionID,
+        projectID: row.projectID,
+        amount: row.amount,
+        description: row.description,
+        dateRecorded: row.dateRecorded,
+        paymentStatus: row.paymentStatus,
+        transactionType: row.transactionType,
+        payer: revenue?.payer ?? null,
+        revenueType: revenue?.revenueType ?? null,
+      };
+    });
 
     return NextResponse.json(formatted);
   } catch (err) {
@@ -96,7 +102,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pr
   }
 }
 
-// add a new revenue entry to the project
+// adds a new revenue entry to the project
 export async function POST(request: NextRequest, context: { params: Promise<{ projectId: string }> }) {
     try {
     const supabase = await createClient();
