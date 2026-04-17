@@ -47,6 +47,18 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pr
     const supabase = await createClient();
     const { projectId } = await context.params;
 
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !authUser) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const parsedProjectId = Number(projectId);
     if (Number.isNaN(parsedProjectId)) {
       return NextResponse.json({ error: "Invalid project ID" }, { status: 400 });
@@ -57,6 +69,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pr
       .select(`
         transactionID,
         projectID,
+        userID,
         amount,
         description,
         dateRecorded,
@@ -83,6 +96,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pr
       return {
         transactionID: row.transactionID,
         projectID: row.projectID,
+        userID: row.userID,
         amount: row.amount,
         description: row.description,
         dateRecorded: row.dateRecorded,
@@ -107,6 +121,18 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
     try {
     const supabase = await createClient();
     const { projectId } = await context.params;
+
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !authUser) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
     const parsedProjectId = Number(projectId);
     if (Number.isNaN(parsedProjectId)) {
@@ -136,6 +162,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
       .from("transactions")
       .insert({
         projectID: parsedProjectId,
+        userID: authUser.id,
         amount: Number(amount),
         description: description?.trim() ? description.trim() : null,
         dateRecorded,
@@ -164,7 +191,8 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
       await supabase
         .from("transactions")
         .delete()
-        .eq("transactionID", transaction.transactionID);
+        .eq("transactionID", transaction.transactionID)
+        .eq("userID", authUser.id);
 
       return NextResponse.json(
         { error: revenueError.message },
@@ -172,10 +200,13 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
       );
     }
 
-    return NextResponse.json({
-      message: "Revenue added successfully",
-      transactionID: transaction.transactionID,
-    });
+    return NextResponse.json(
+      {
+        message: "Revenue added successfully",
+        transactionID: transaction.transactionID,
+      },
+      { status: 201 }
+    );
   } catch (err) {
     return NextResponse.json(
       { error: "Failed to add revenues" },

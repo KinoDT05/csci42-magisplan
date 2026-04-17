@@ -8,6 +8,18 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pr
     const supabase = await createClient();
     const { projectId } = await context.params;
 
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !authUser) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     console.log("projectId:", projectId);
 
     // validates the project ID

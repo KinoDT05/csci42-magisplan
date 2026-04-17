@@ -47,6 +47,18 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ p
     const supabase = await createClient();
     const { projectId, transactionId } = await context.params;
 
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !authUser) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const parsedProjectId = Number(projectId);
     const parsedTransactionId = Number(transactionId);
 
@@ -75,7 +87,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ p
 
     const parsedAmount = Number(amount);
 
-    const { error: transactionError } = await supabase
+    const { data: updatedTransaction, error: transactionError } = await supabase
       .from("transactions")
       .update({
         amount: parsedAmount,
@@ -85,12 +97,22 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ p
       })
       .eq("transactionID", parsedTransactionId)
       .eq("projectID", parsedProjectId)
-      .eq("transactionType", "expense");
+      .eq("transactionType", "expense")
+      .eq("userID", authUser.id)
+      .select("transactionID")
+      .maybeSingle();
 
     if (transactionError) {
       return NextResponse.json(
         { error: transactionError.message },
         { status: 500 }
+      );
+    }
+
+    if (!updatedTransaction) {
+      return NextResponse.json(
+        { error: "Expense not found or unauthorized" },
+        { status: 404 }
       );
     }
 
@@ -125,6 +147,18 @@ export async function DELETE(_request: NextRequest, context: { params: Promise<{
     const supabase = await createClient();
     const { projectId, transactionId } = await context.params;
 
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !authUser) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const parsedProjectId = Number(projectId);
     const parsedTransactionId = Number(transactionId);
 
@@ -135,15 +169,25 @@ export async function DELETE(_request: NextRequest, context: { params: Promise<{
       );
     }
 
-    const { error } = await supabase
+    const { data: deletedTransaction, error } = await supabase
       .from("transactions")
       .delete()
       .eq("transactionID", parsedTransactionId)
       .eq("projectID", parsedProjectId)
-      .eq("transactionType", "expense");
+      .eq("transactionType", "expense")
+      .eq("userID", authUser.id)
+      .select("transactionID")
+      .maybeSingle();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (!deletedTransaction) {
+      return NextResponse.json(
+        { error: "Expense not found or unauthorized" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ message: "Expense deleted successfully" });
