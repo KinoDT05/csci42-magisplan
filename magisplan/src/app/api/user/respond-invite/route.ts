@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-
+import { shareFolderWithUser } from '@/lib/google-drive';
 
 export async function POST(
     req: NextRequest,
@@ -32,7 +32,7 @@ export async function POST(
 
     const { data: userData, error: userError } = await supabase
         .from("users")
-        .select("firstName")
+        .select("firstName, google_email")
         .eq("userID", userID)
         .single();
 
@@ -62,40 +62,54 @@ export async function POST(
 
     const projectID = projData?.projectID;
 
+    const { data: project, error: projectError } = await supabase
+        .from("projects")
+        .select("ownerID, driveID")
+        .eq("projectID", projectID)
+        .single();
+
     if (response === "accept") {
-        const { error:deleteError } = await supabase
-            .from("project_invites")
-            .delete()
-            .eq("userID", userID)
-            .eq("committeeID", committeeID);
+        try {
+            // 1. Share the folder FIRST
+            // We use the ownerID from the projects table to get the correct refresh token
+            await shareFolderWithUser(
+                project.ownerID,
+                project.driveID,
+                userData.google_email,
+                "writer"
+            );
 
-        if (deleteError) {
+            // 2. Update Database
+            const { error: deleteError } = await supabase
+                .from("project_invites")
+                .delete()
+                .eq("userID", userID)
+                .eq("committeeID", committeeID);
+
+            if (deleteError) throw deleteError;
+
+            const { error: insertError } = await supabase
+                .from("project_members")
+                .insert({
+                    userID: userID,
+                    projectID: projectID,
+                    committeeID: committeeID,
+                    role: role,
+                    displayName: displayName,
+                    dateJoined: new Date()
+                });
+
+            if (insertError) throw insertError;
+
+            return NextResponse.json({ message: "Invite accepted and Drive folder shared" }, { status: 200 });
+
+        } catch (err: any) {
+            console.error("Critical Error in Invite Accept:", err.message);
             return NextResponse.json(
-                { error: deleteError },
-                { status: 400 }
+                { error: err.message || "An unexpected error occurred" },
+                { status: 500 }
             );
         }
-
-        const { error: insertError } = await supabase
-            .from("project_members").
-            insert({
-                userID: userID,
-                projectID: projectID,
-                committeeID: committeeID,
-                role: role,
-                displayName: displayName,
-                dateJoined: new Date()
-            });
-
-        if (insertError) {
-            return NextResponse.json(
-                { error: insertError },
-                { status: 400 }
-            );
-        }
-
-        return NextResponse.json({ message: "Invite accepted" }, { status: 200 });
-
     }
 
     if (response === "deny") {

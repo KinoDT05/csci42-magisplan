@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-
+import { createGoogleFile } from '@/lib/google-drive';
 
 export async function POST(
     req: NextRequest,
@@ -14,7 +14,9 @@ export async function POST(
     if (isNaN(projectID)) {
         throw new Error("Invalid projectId");
     }
-    
+
+
+
     const body = await req.json();
     const {
         taskName,
@@ -24,7 +26,8 @@ export async function POST(
         hasBlastDate,
         blastDate,
         priority,
-        manpowerRequired
+        manpowerRequired,
+        documentType
     } = body;
 
     // 1. Required Fields Check (Presence)
@@ -32,6 +35,45 @@ export async function POST(
     if (!committeeID) return new Response("Committee is required", { status: 400 });
     if (!softDeadline || !hardDeadline) return new Response("Both deadlines are required", { status: 400 });
     if (!priority) return new Response("Priority is required", { status: 400 });
+
+
+
+    const { data: commData, error: commError } = await supabase
+        .from("committee")
+        .select("driveID, driveLink")
+        .eq("committeeID", committeeID)
+        .single();
+
+    if (commError) { return NextResponse.json({ error: commError }, { status: 400 }); }
+
+    const { data: project, error: projectError } = await supabase
+        .from("projects")
+        .select("ownerID, driveID")
+        .eq("projectID", projectID)
+        .single();
+
+    if (projectError) { return NextResponse.json({ error: projectError },{ status: 400 });}
+
+
+    
+    let newDoc;
+
+    console.log("projectOwnerID: " + project?.ownerID);
+    console.log("commData driveID: " + commData?.driveID);
+    console.log("taskName: " + taskName);
+    console.log("document Type: " + documentType);
+
+    if (documentType != "none") {
+        // We create a new empty Google Doc
+        newDoc = await createGoogleFile(
+            project?.ownerID,
+            commData?.driveID,
+            taskName,
+            documentType
+        );
+    }
+    
+    console.log("New Doc: " + newDoc);
 
     // 2. Logic Check: Deadlines
     const soft = new Date(softDeadline);
@@ -69,6 +111,8 @@ export async function POST(
                 manpowerRequired: Number(manpowerRequired),
                 priority: priority,
                 status: "NotStarted",
+                driveID: newDoc?.id,
+                driveLink: newDoc?.webViewLink
             },
         ])
         .select();

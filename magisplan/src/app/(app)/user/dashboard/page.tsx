@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { createClient } from '@/lib/supabase/client'
 import ProjectList from "@/components/ProjectList";
 import InvitesList from "@/components/InvitesList";
+import GoogleSetting from "@/components/GoogleSetting";
+import CreateFolderTest from "@/components/CreateFolderTest";
+import LogoutButton from "@/components/LogoutButton";
 interface Projects {
     targetDate: string;
     projectName: string;
@@ -18,11 +21,12 @@ interface Invites {
     projectName: string;
     projectDescription: string;
 }
-export default function CreateProject() {
+export default function Dashboard() {
     const [projects, setProjects] = useState<Projects[]>([]);
     const [invites, setInvites] = useState<Invites[]>([]);
 
     const [userId, setUserId] = useState<string | null>(null);
+    const [userConnection, setUserConnection] = useState(false);
     const [loading, setLoading] = useState(true)
 
 
@@ -44,10 +48,18 @@ export default function CreateProject() {
             const supabase = await createClient();
             const { data: { user } } = await supabase.auth.getUser();
 
+            if (!user) {
+                setLoading(false);
+                return;
+            }
+
             setUserId(user?.id ?? null);
+
+            const { data: userObj } = await supabase.from("users").select("google_connected").eq("userID", user?.id)
 
             await getAll();
             setLoading(false);
+            setUserConnection(userObj?.[0]?.google_connected ?? false);
         };
 
         init();
@@ -59,8 +71,10 @@ export default function CreateProject() {
     return (
         <div className="min-h-screen flex">
             <div className="w-4/5 p-6">
+                <GoogleSetting isConnected={userConnection} />
                 <h2>Projects</h2>
-                <ProjectList projects={projects}  />
+                <ProjectList projects={projects} />
+                <LogoutButton/>
             </div>
             <div className="w-1/5 flex flex-col p-4">
                 <h2>Invites</h2>

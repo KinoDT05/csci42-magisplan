@@ -22,6 +22,7 @@ interface Project {
     projectName: string;
     projectDescription: string;
     targetDate: string;
+    driveLink: string;
 }
 
 export default function Dashboard() {
@@ -53,7 +54,7 @@ export default function Dashboard() {
         const supabase = await createClient();
         const { data } = await supabase
         .from("projects")
-        .select("projectName, projectDescription, targetDate")
+            .select("projectName, projectDescription, targetDate, driveLink")
         .eq("projectID", projectID)
         .single();
         
@@ -138,16 +139,16 @@ export default function Dashboard() {
                     
                     <div className="flex flex-wrap justify-center gap-x-16 gap-y-10 px-4">
                         {[
-                            ["calendar", "Calendar"],
-                            ["directory", "Directory"],
-                            ["docs", "Document Repository"],
-                            ["tasks", "Tasks"],
-                            ["budget", "Budget Tracker"],
-                            ["discussion", "Discussion Page"],
-                        ].map(([icon, label]) => (
+                                ["calendar", `/projects/${projectID}/calendar`, "Calendar"],
+                                ["directory", `/projects/${projectID}/directory`, "Directory"],
+                                ["docs", project?.driveLink ?? "#" , "Document Repository"],
+                                ["tasks", `/projects/${projectID}/tasks`, "Tasks"],
+                                ["budget", `/projects/${projectID}/budget`, "Budget Tracker"],
+                                ["discussion", `/projects/${projectID}/discussion`, "Discussion Page"],
+                        ].map(([icon,redirectLink, label]) => (
                             <Link
                                 key={label}
-                                href={`/projects/${projectID}/${icon}`}
+                                href={redirectLink}
                                 className="hover:scale-105"
                             >
                                 <div className="flex flex-col items-center gap-3">
