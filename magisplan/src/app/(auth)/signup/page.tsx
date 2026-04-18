@@ -10,6 +10,7 @@ export default function SignupPage() {
   const [lastName, setLastName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [message, setMessage] = useState("");
+  const [username, setUsername] = useState("");
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +25,7 @@ export default function SignupPage() {
         middleName,
         lastName,
         contactNumber,
+        username,
       }),
     });
 
@@ -43,6 +45,7 @@ export default function SignupPage() {
           </h2>
 
           <input className="input-field" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)}/>
+          <input className="input-field" placeholder="Your username" value={username} onChange={e => setUsername(e.target.value)} />
           <input className="input-field" placeholder="Your first name" value={firstName} onChange={e => setFirstName(e.target.value)} />
           <input className="input-field" placeholder="Your middle name" value={middleName} onChange={e => setMiddleName(e.target.value)} />
           <input className="input-field" placeholder="Your last name" value={lastName} onChange={e => setLastName(e.target.value)} />
@@ -50,7 +53,7 @@ export default function SignupPage() {
           <input className="input-field" placeholder="Create password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
 
           <p className="mt-8">
-            Already have an account? Log in here.
+            Already have an account? <a href="/login" className="text-[#0F5EA7]">Login here.</a>
           </p>
           <button type="submit" className="btn-primary">Sign Up</button>
 

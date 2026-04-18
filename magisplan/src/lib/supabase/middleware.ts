@@ -32,7 +32,7 @@ export async function updateSession(request: NextRequest) {
 
     // Logged in + trying to access login/signup → send to app
     if (user && authRoutes.some(route => pathname.startsWith(route))) {
-        return NextResponse.redirect(new URL('/moderator/create-project', request.url))
+        return NextResponse.redirect(new URL('/user/dashboard', request.url))
     }
 
     return response
