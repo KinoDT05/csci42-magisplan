@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useParams } from "next/navigation";
-import SidebarLayout from "@/components/SidebarLayout";
 import Link from "next/link";
 
 interface Task {
@@ -103,7 +102,6 @@ export default function Dashboard() {
     };
     
     return (
-    <SidebarLayout mainClassName="!p-0">
         <div className="w-full min-h-screen bg-white text-black font-sans pb-12">
             <div className="h-24 bg-[#e6e6e6] w-full relative mb-8"></div>
             <div className="px-10 max-w-6xl mx-auto space-y-12">
@@ -233,6 +231,5 @@ export default function Dashboard() {
                 </div>
             </div>
         </div>
-    </SidebarLayout>
     );
 }
