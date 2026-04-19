@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect} from "react";
+import { useState, useEffect, useMemo} from "react";
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from "next/navigation";
 import {useParams} from "next/navigation";
@@ -16,7 +16,7 @@ type Expense = {
     expenseType: string
 };
 
-export default function RevenuePage() {
+export default function ExpensesPage() {
     const params = useParams();
     const router = useRouter();
     const projectID = params.projectId;
@@ -35,6 +35,8 @@ export default function RevenuePage() {
     const [payee, setPayee] = useState("");
     const [expenseType, setPaymentType] = useState("");
     const [dateRecorded, setDateRecorded] = useState("");
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+    const [statusFilter, setStatusFilter] = useState("all");
 
     //get user 
     useEffect(() => {
@@ -80,7 +82,7 @@ export default function RevenuePage() {
         };
 
         if (projectID) fetchSummary();
-    });
+    }, [projectID]);
 
     // get expenses details
     useEffect(() => {
@@ -121,6 +123,31 @@ export default function RevenuePage() {
         setPaymentType("");
         setDateRecorded("");
     };
+
+    const displayedExpenses = useMemo(() => {
+        let filtered = [...expenses];
+
+        if (statusFilter !== "all") {
+            filtered = filtered.filter(
+                (item) => item.paymentStatus.toLowerCase() === statusFilter
+            );
+        }
+
+        filtered.sort((a, b) => {
+            const dateA = new Date(a.dateRecorded).getTime();
+            const dateB = new Date(b.dateRecorded).getTime();
+
+            return sortOrder === "asc"
+                ? dateA - dateB
+                : dateB - dateA;
+        });
+
+        return filtered;
+    }, [expenses, sortOrder, statusFilter]);
+
+    const toggleDateSort = () => {
+        setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+};
     
     return (
         <div className="bg-[#f5f5f5] w-ful min-h-screen -mx-8 -my-4 p-7">
@@ -129,7 +156,7 @@ export default function RevenuePage() {
             {/* summary information + expenses button */}
             <div className="grid grid-cols-4 gap-6 mb-7">
                 <div className="bg-white shadow-lg p-2 rounded-lg cursor-pointer" onClick={() =>
-                  router.push(`/projects/${projectID}/budget/revenue`)}>     
+                  router.push(`/projects/${projectID}/budget/revenues`)}>     
                     <p className="text-sm">Total Revenue</p>
                     <p className="mt-3 font-bold text-4xl">P{totalRevenue}</p>   
                 </div>
@@ -145,7 +172,13 @@ export default function RevenuePage() {
                     <p className="mt-3 font-bold text-4xl">P{netIncome}</p>
                 </div>
 
-                <div className="flex items-center">
+                <div className="flex flex-col items-center gap-3">
+                    <select className="bg-white px-3 py-2 rounded-lg shadow" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                        <option value="all">All Status</option>
+                        <option value="paid">Paid</option>
+                        <option value="outstanding">Outstanding</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
                     <button className="btn-primary mt-auto cursor-pointer"  onClick={() => setShowModal(true)}>Add an expense</button>
                 </div>
             </div>
@@ -154,7 +187,11 @@ export default function RevenuePage() {
             <div className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_0.5fr] gap-4 bg-white shadow-lg p-4 rounded-lg">
                 <div className="font-semibold text-sm">Payee</div>
                 <div className="font-semibold text-sm">Type</div>
-                <div className="font-semibold text-sm">Date</div>
+                <div className="font-semibold text-sm">
+                    <button onClick={toggleDateSort} className="font-semibold text-sm text-left cursor-pointer hover:text-blue-600">
+                        Date {sortOrder === "asc" ? "↑" : "↓"}
+                    </button>
+                </div>
                 <div className="font-semibold text-sm">Transaction ID</div>
                 <div className="font-semibold text-sm">Total</div>
                 <div className="font-semibold text-sm">Status</div>
@@ -165,7 +202,7 @@ export default function RevenuePage() {
                 {expenses.length === 0 && !error ? (
                     <p>No expenses listed.</p>
                 ) : (
-                    expenses.map((expense) => (
+                    displayedExpenses.map((expense) => (
                         <div key={expense.transactionID} className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_0.5fr] gap-4 bg-white p-4 rounded-lg">
                             <p>{expense.payee}</p>
                             <p>{expense.expenseType}</p>
