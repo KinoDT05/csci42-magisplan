@@ -42,6 +42,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                     hardDeadline,
                     priority,
                     status,
+                    driveLink,
                     tasks_assignment (
                       userID,
                       users (
@@ -71,6 +72,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
                     hardDeadline,
                     priority,
                     status,
+                    driveLink,
                     tasks_assignment!inner (
                       userID,
                       users (
@@ -135,6 +137,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
             blastDate,
             priority,
             status,
+            driveLink,
             manpowerRequired,
             tasks_assignment (
               userID,
@@ -173,6 +176,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ proj
             blastDate,
             priority,
             status,
+            driveLink,
             manpowerRequired,
             tasks_assignment (
               userID,
