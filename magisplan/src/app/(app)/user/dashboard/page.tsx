@@ -7,6 +7,9 @@ import ProjectList from "@/components/ProjectList";
 import InvitesList from "@/components/InvitesList";
 import UserTaskList from "@/components/UserTaskList";
 
+import GoogleSetting from "@/components/GoogleSetting";
+import CreateFolderTest from "@/components/CreateFolderTest";
+import LogoutButton from "@/components/LogoutButton";
 interface Projects {
     targetDate: string;
     projectName: string;
@@ -33,12 +36,13 @@ interface Task {
     projectName: string;
 }
 
-export default function UserDashboard() {
+export default function Dashboard() {
     const [projects, setProjects] = useState<Projects[]>([]);
     const [invites, setInvites] = useState<Invites[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [userConnection, setUserConnection] = useState(false);
+    const [loading, setLoading] = useState(true)
 
     const [searchQuery, setSearchQuery] = useState("");
     const [activeTab, setActiveTab] = useState<"all" | "active" | "archived">("all");
@@ -63,9 +67,19 @@ export default function UserDashboard() {
         const init = async () => {
             const supabase = await createClient();
             const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                setLoading(false);
+                return;
+            }
+
             setUserId(user?.id ?? null);
+
+            const { data: userObj } = await supabase.from("users").select("google_connected").eq("userID", user?.id)
+
             await getAll();
             setLoading(false);
+            setUserConnection(userObj?.[0]?.google_connected ?? false);
         };
         init();
     }, []);
@@ -109,6 +123,8 @@ export default function UserDashboard() {
                             className="w-full bg-[#f3f4f6] text-[var(--main)] font-medium rounded-full py-3 px-6 outline-none border border-transparent focus:border-[var(--main)] shadow-sm"
                         />
                     </div>
+
+                    <GoogleSetting isConnected={userConnection} />
 
                     <div className="flex-1 flex flex-col">
                         <div className="flex justify-between items-center border-b border-gray-300 pb-2 mb-4 shrink-0">

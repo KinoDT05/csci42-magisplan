@@ -24,7 +24,8 @@ export default function AddTaskModal({ committeeOfAdder, onRefresh }) {
         hasBlastDate: false,
         blastDate: "",
         priority: "",
-        manpowerRequired: 1
+        manpowerRequired: 1,
+        documentType: "none"
     });
 
     const handleChange = (e) => {
@@ -192,6 +193,16 @@ export default function AddTaskModal({ committeeOfAdder, onRefresh }) {
                     <div className="flex flex-col">
                         <label className="text-sm font-medium">Manpower Required</label>
                         <input name="manpowerRequired" type="number" className="border p-2 rounded" min={1} value={form.manpowerRequired} onChange={handleChange} />
+                    </div>
+
+                    <div className="flex flex-col">
+                        <label className="text-sm font-medium">Document Needed</label>
+                        <select name="documentType" value={form.documentType} onChange={handleChange} className="border p-2 rounded" required>
+                            <option value="none">None</option>
+                            <option value="doc">Docs</option>
+                            <option value="sheet">Sheets</option>
+                            <option value="slide">Slides</option>
+                        </select>
                     </div>
 
                     <button
