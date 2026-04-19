@@ -12,7 +12,7 @@ export default function LogoutButton() {
     }
 
     return (
-        <button onClick={handleLogout}>
+        <button onClick={handleLogout} className="cursor-pointer">
             Logout
         </button>
     )

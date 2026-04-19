@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient"
+import DashboardButton from "@/components/BackToDashboard";
 
 type Topic = {
   topicID: number;
@@ -137,7 +138,9 @@ export default function DiscussionPage({ params }: { params: Promise<{ projectId
 
   return (
     <div className="bg-[#f5f5f5] w-ful min-h-screen -mx-8 -my-4 p-7">
-      <h1 className="text-5xl font-semibold text-[var(--main)]">{projectName} Discussion Page</h1>
+      <h1 className="text-5xl font-semibold text-[var(--main)]">
+        <DashboardButton projectID={projectId} />
+        {projectName} Discussion Page</h1>
 
       {/* create new topic */}
       <div className="flex bg-[var(--background)] px-5 py-3 rounded-xl items-center text-[var(--txt-gray)] my-10">

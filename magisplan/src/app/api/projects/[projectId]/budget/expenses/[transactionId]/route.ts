@@ -47,8 +47,6 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ p
     const supabase = await createClient();
     const { projectId, transactionId } = await context.params;
 
-<<<<<<< HEAD
-=======
     const {
       data: { user: authUser },
       error: authError,
@@ -61,7 +59,6 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ p
       );
     }
 
->>>>>>> 91d5cc95719c34c0a6353d8090485cec00ac4b59
     const parsedProjectId = Number(projectId);
     const parsedTransactionId = Number(transactionId);
 
@@ -90,11 +87,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ p
 
     const parsedAmount = Number(amount);
 
-<<<<<<< HEAD
-    const { error: transactionError } = await supabase
-=======
     const { data: updatedTransaction, error: transactionError } = await supabase
->>>>>>> 91d5cc95719c34c0a6353d8090485cec00ac4b59
       .from("transactions")
       .update({
         amount: parsedAmount,
@@ -104,14 +97,10 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ p
       })
       .eq("transactionID", parsedTransactionId)
       .eq("projectID", parsedProjectId)
-<<<<<<< HEAD
-      .eq("transactionType", "expense");
-=======
       .eq("transactionType", "expense")
       .eq("userID", authUser.id)
       .select("transactionID")
       .maybeSingle();
->>>>>>> 91d5cc95719c34c0a6353d8090485cec00ac4b59
 
     if (transactionError) {
       return NextResponse.json(

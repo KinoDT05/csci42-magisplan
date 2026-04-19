@@ -5,10 +5,12 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from "next/navigation";
 import {useParams} from "next/navigation";
 import { supabase } from "@/lib/supabaseClient"
+import DashboardButton from "@/components/BackToDashboard";
 
 type Expense = {
+    userID: string;
     transactionID: number;
-    amount: number;
+    amount: string;
     description: string;
     dateRecorded: string; 
     paymentStatus: string;
@@ -37,6 +39,7 @@ export default function ExpensesPage() {
     const [dateRecorded, setDateRecorded] = useState("");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [editingTransactionID, setTransactionID] = useState<number | null>(null);
 
     //get user 
     useEffect(() => {
@@ -85,18 +88,15 @@ export default function ExpensesPage() {
     }, [projectID]);
 
     // get expenses details
-    useEffect(() => {
-        const fetchExpenses = async () => {
-            const res = await fetch(`/api/projects/${projectID}/budget/expenses`)
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error);
-                return;
-            }
-            setExpenses(data);
-        };
-        fetchExpenses();
-    }, [projectID])
+    const fetchExpenses = async () => {
+        const res = await fetch(`/api/projects/${projectID}/budget/expenses`);
+        const data = await res.json();
+        if (!res.ok) { setError(data.error); return; }
+        setExpenses(data);
+    };
+
+    useEffect(() => {fetchExpenses();}, [projectID]);
+
 
     // add an expense
     const handleAddExpense = async () => {
@@ -122,6 +122,7 @@ export default function ExpensesPage() {
         setPayee("");
         setPaymentType("");
         setDateRecorded("");
+        fetchExpenses();
     };
 
     const displayedExpenses = useMemo(() => {
@@ -147,11 +148,56 @@ export default function ExpensesPage() {
 
     const toggleDateSort = () => {
         setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-};
+    };
+
+    //edit row data
+    const saveEdit = async (transactionID:number) => {
+        if (!editingTransactionID) return;
+
+        const res = await fetch(
+        `/api/projects/${projectID}/budget/expenses/${transactionID}`,
+        {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({payee: payee, expenseType: expenseType, dateRecorded: dateRecorded, amount: amount, paymentStatus: paymentStatus}),
+        }
+        );
+        const data = await res.json();
+        if (!res.ok) {setError(data.error); return; }
+        setTransactionID(null);
+        setAmount("");
+        setDescription("");
+        setPaymentStatus("");
+        setPayee("");
+        setPaymentType("");
+        setDateRecorded("");
+        fetchExpenses();
+    }
+
+    //delete row data
+    async function handleDeleteExpense(transactionID: number) {
+        const res = await fetch(
+        `/api/projects/${projectID}/budget/expenses/${transactionID}`,
+        {
+            method: "DELETE",
+        }
+        );
+
+        if (!res.ok) {
+        const err = await res.json();
+        console.error(err)
+        return;
+        }
+
+        console.log("Deleted successfully")
+        fetchExpenses();
+    }
     
     return (
         <div className="bg-[#f5f5f5] w-ful min-h-screen -mx-8 -my-4 p-7">
-            <div className="text-5xl font-semibold text-[var(--main)] mb-7">{projectName} Budget Tracker</div>
+            <div className="text-5xl font-semibold text-[var(--main)] mb-7">
+                <DashboardButton projectID={projectID} />
+                {projectName} Budget Tracker</div>
 
             {/* summary information + expenses button */}
             <div className="grid grid-cols-4 gap-6 mb-7">
@@ -210,13 +256,16 @@ export default function ExpensesPage() {
                             <p>{expense.transactionID}</p>
                             <p>{expense.amount}</p>
                             <p>{expense.paymentStatus}</p>
-                            {/* {userID === expense.userID && (
-                                <div className="flex gap-2 mt-2 ml-auto">
+                            {userID === expense.userID && (
+                                <div className="flex flex-row gap-5 ml-auto justify-center">
                                     <button className="cursor-pointer">
-                                        <img src="/edit.svg" width={15} />
+                                        <img src="/edit.svg" width={20} onClick={() => { setTransactionID(expense.transactionID); setPayee(expense.payee); setPaymentType(expense.expenseType); setDateRecorded(expense.dateRecorded); setAmount(expense.amount); setPaymentStatus(expense.paymentStatus);}}/>
+                                    </button>
+                                    <button className="cursor-pointer" onClick= {() => { handleDeleteExpense(expense.transactionID);}}>
+                                        <img src="/delete.svg" width={20} />
                                     </button>
                                 </div>
-                            )} */}
+                            )}
                         </div>
                     ))
                 )}
@@ -263,6 +312,41 @@ export default function ExpensesPage() {
                         </div>
                         {error && <p className="text-red-500 mt-2">{error}</p>}
                     </div>
+                </div>
+            )}
+
+            
+            {/* editing modal */}
+            {editingTransactionID && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                <div className="bg-white w-[500px] p-6 rounded-xl shadow-lg">
+
+                    <h2 className="font-bold mb-3">Edit Reply</h2>
+
+                    <textarea className="w-full p-3 border" value={payee} onChange={(e) => setPayee(e.target.value)} rows={1}/>
+                    <textarea className="w-full p-3 border" value={expenseType} onChange={(e) => setPaymentType(e.target.value)} rows={1}/>
+                    <textarea className="w-full p-3 border" value={dateRecorded} onChange={(e) => setDateRecorded(e.target.value)} rows={1}/>
+                    <textarea className="w-full p-3 border" value={amount} onChange={(e) => setAmount(e.target.value)} rows={1}/>
+                    <textarea className="w-full p-3 border" value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)} rows={1}/>
+
+                    <div className="flex gap-2 mt-4">
+                        <button onClick={() => {
+                                setTransactionID(null);
+                                setAmount("");
+                                setDescription("");
+                                setPaymentStatus("");
+                                setPayee("");
+                                setPaymentType("");
+                                setDateRecorded("");
+                            }}>
+                            Cancel
+                        </button>
+
+                        <button onClick={() => saveEdit(editingTransactionID!)} className="btn-primary ml-auto">
+                            Save
+                        </button>
+                    </div>
+                </div>
                 </div>
             )}
         </div>
