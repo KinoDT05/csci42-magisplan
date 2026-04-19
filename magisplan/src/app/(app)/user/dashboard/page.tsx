@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { createClient } from '@/lib/supabase/client'
 import ProjectList from "@/components/ProjectList";
 import InvitesList from "@/components/InvitesList";
+import UserTaskList from "@/components/UserTaskList";
+
 interface Projects {
     targetDate: string;
     projectName: string;
@@ -18,9 +20,20 @@ interface Invites {
     projectName: string;
     projectDescription: string;
 }
+
+interface Task {
+    taskID: number;
+    taskName: string;
+    hardDeadline: string;
+    priority: string;
+    status: string;
+    projectName: string;
+}
+
 export default function CreateProject() {
     const [projects, setProjects] = useState<Projects[]>([]);
     const [invites, setInvites] = useState<Invites[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
 
     const [userId, setUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true)
@@ -28,15 +41,18 @@ export default function CreateProject() {
 
     const getProjects = () => fetch("/api/user/get-projects").then(res => res.json());
     const getInvites = () => fetch("/api/user/get-invites").then(res => res.json());
+    const getTasks = () => fetch("/api/user/get-my-tasks").then(res => res.json());
 
     const getAll = async () => {
-        const [projects, invites] = await Promise.all([
+        const [projects, invites, tasksRes] = await Promise.all([
             getProjects(),
-            getInvites()
+            getInvites(),
+            getTasks()
         ]);
 
         setProjects(projects.data);
         setInvites(invites.data);
+        setTasks(tasksRes.data);
     };
 
     useEffect(() => {
@@ -65,6 +81,9 @@ export default function CreateProject() {
             <div className="w-1/5 flex flex-col p-4">
                 <h2>Invites</h2>
                 <InvitesList invites={invites} onRespond={ getAll } />
+
+                <h2>My Tasks</h2>
+                <UserTaskList tasks={tasks} />
             </div>
         </div>
 
