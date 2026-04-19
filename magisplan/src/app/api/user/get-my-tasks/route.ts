@@ -18,7 +18,7 @@ export async function GET() {
     }
 
     const { data, error } = await supabase
-      .from("task_assignment")
+      .from("tasks_assignment")
       .select(`
         taskID,
         tasks (
@@ -31,10 +31,7 @@ export async function GET() {
           blastDate,
           manpowerRequired,
           priority,
-          status,
-          projects (
-            projectName
-          )
+          status
         )
       `)
       .eq("userID", user.id);
@@ -46,9 +43,28 @@ export async function GET() {
       );
     }
 
-    const tasks = data?.map((row) => row.tasks) ?? [];
+    const tasks = data?.map((row: any) => ({
+      ...row.tasks,
+      projectID: row.tasks?.projectID ?? null,
+    })) ?? [];
 
-    return NextResponse.json({ data: tasks }, { status: 200 });
+    const projectIDs = [...new Set(tasks.map((t: any) => t.projectID).filter(Boolean))];
+
+    const { data: projects } = await supabase
+      .from("projects")
+      .select("projectID, projectName")
+      .in("projectID", projectIDs);
+
+    const projectMap = Object.fromEntries(
+      (projects ?? []).map((p: any) => [p.projectID, p.projectName])
+    );
+
+    const tasksWithProject = tasks.map((task: any) => ({
+      ...task,
+      projectName: projectMap[task.projectID] ?? null,
+    }));
+
+    return NextResponse.json({ data: tasksWithProject }, { status: 200 });
   } catch {
     return NextResponse.json(
       { error: "Unexpected server error" },
