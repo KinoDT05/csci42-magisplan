@@ -13,6 +13,7 @@ type ProfileData = {
   emailAddress: string;
   contactNumber: string;
   username: string;
+  profileImageUrl?: string | null;
   projects: {
     projectID: number;
     projectName: string;
@@ -24,7 +25,7 @@ export default function ProfilePage() {
   const params = useParams();
   const username = params.username as string;
 
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export default function ProfilePage() {
         setUser(result);
       } catch (error) {
         console.error("[ProfilePage] unexpected error:", error);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -61,13 +63,18 @@ export default function ProfilePage() {
 
   return (
     <div className="w-full px-6 py-6">
-
-      {/* profile details */}
       <div className="flex flex-col md:flex-row items-center gap-6 mb-20">
-
         <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="w-48 h-48 flex items-center justify-center bg-[var(--txt-gray)] text-white rounded-full">
-            <p className="text-center">No Available Image</p>
+          <div className="w-48 h-48 rounded-full overflow-hidden bg-[var(--txt-gray)] flex items-center justify-center">
+            {user?.profileImageUrl ? (
+              <img
+                src={user.profileImageUrl}
+                alt={`${user.username}'s profile`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <p className="text-center text-white px-2">No Available Image</p>
+            )}
           </div>
 
           <div className="flex flex-col justify-center text-[var(--main)]">
@@ -96,7 +103,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* header */}
       <div className="flex gap-6 text-center mb-5">
         <div className="w-2/3 bg-[#E6E6E6] rounded-xl p-5 font-semibold shadow-md">
           Project
@@ -107,11 +113,10 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* list */}
       <div className="flex gap-6">
         <div className="w-2/3 bg-[#E6E6E6] rounded-xl p-5 shadow-md text-center">
           {user?.projects?.length ? (
-            user.projects.map((item: any, index: number) => (
+            user.projects.map((item, index) => (
               <div key={index} className="mb-2">
                 {item.projectName}
               </div>
@@ -123,7 +128,7 @@ export default function ProfilePage() {
 
         <div className="w-1/3 bg-[#E6E6E6] rounded-xl p-5 shadow-md text-center">
           {user?.projects?.length ? (
-            user.projects.map((item: any, index: number) => (
+            user.projects.map((item, index) => (
               <div key={index} className="mb-2">
                 {item.role}
               </div>
@@ -133,7 +138,6 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
-
     </div>
   );
 }
