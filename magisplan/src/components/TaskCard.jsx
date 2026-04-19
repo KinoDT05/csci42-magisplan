@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import AssignTaskModal from "@/components/AssignTaskModal";
 import UpdateTaskModal from "@/components/UpdateTaskModal";
+import Link from "next/link";
+
 export default function TaskCard({ task, num, userRole, userComm, userID, onRefresh}) {
     const canAssign = userComm === "Moderators" || (userComm === task.committeeName && userRole === "Head");
     const isAssigned = task.assignedPerson && task.assignedPerson !== "None";
@@ -33,8 +35,10 @@ export default function TaskCard({ task, num, userRole, userComm, userID, onRefr
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: num * 0.2 }}
       >
-      
-        <div className="font-semibold">{task.taskName}</div>
+          <Link href={task.driveLink ?? "#"}>
+              <div className="font-semibold">{task.taskName}</div>
+          </Link>
+        
         <div>
               {isAssigned ? (
                   task.assignedPerson
