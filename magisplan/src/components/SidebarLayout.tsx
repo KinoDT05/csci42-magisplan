@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import LogoutButton from "@/components/LogoutButton";
 import Link from "next/link";
 
 export default function SidebarLayout({
@@ -47,7 +48,7 @@ export default function SidebarLayout({
         <nav>
           <ul>
             <li>
-              <p className="text-2xl font-bold titleEx text-white py-5">
+              <p className="text-2xl font-bold text-white py-5">
                 MagisPlan
               </p>
             </li>
@@ -74,16 +75,17 @@ export default function SidebarLayout({
             </li>
 
             <li>
-              <Link href="#">
-                <img src="/project.svg" width={30} />
-                <span>My Projects</span>
-              </Link>
+              <div className="sidebar-logout">
+                <img src="/logout.svg" width={30} />
+                <span>
+                  <LogoutButton />
+                </span>
+              </div>
             </li>
-
+           
             <li>
               <button onClick={() => setExpanded(!expanded)}>
                 <img src="/arrow.svg" width={30} />
-                <span>Collapse</span>
               </button>
             </li>
           </ul>

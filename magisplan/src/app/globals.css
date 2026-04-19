@@ -152,3 +152,31 @@ aside {
   min-height: 100vh;
  }
 
+ .sidebar-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  color: white;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.sidebar-logout:hover {
+  background-color: #0F5EA7;
+}
+
+.sidebar-logout span {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s ease-in-out,
+    visibility 0.3s ease-in-out;
+}
+
+.sb-expanded .sidebar-logout span {
+  opacity: 1;
+  visibility: visible;
+}
+

@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect} from "react";
+import { useState, useEffect, useMemo} from "react";
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from "next/navigation";
 import {useParams} from "next/navigation";
 import { supabase } from "@/lib/supabaseClient"
+import DashboardButton from "@/components/BackToDashboard";
 
 type Expense = {
+    userID: string;
     transactionID: number;
-    amount: number;
+    amount: string;
     description: string;
     dateRecorded: string; 
     paymentStatus: string;
@@ -16,7 +18,7 @@ type Expense = {
     expenseType: string
 };
 
-export default function RevenuePage() {
+export default function ExpensesPage() {
     const params = useParams();
     const router = useRouter();
     const projectID = params.projectId;
@@ -35,6 +37,9 @@ export default function RevenuePage() {
     const [payee, setPayee] = useState("");
     const [expenseType, setPaymentType] = useState("");
     const [dateRecorded, setDateRecorded] = useState("");
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+    const [statusFilter, setStatusFilter] = useState("all");
+    const [editingTransactionID, setTransactionID] = useState<number | null>(null);
 
     //get user 
     useEffect(() => {
@@ -80,21 +85,18 @@ export default function RevenuePage() {
         };
 
         if (projectID) fetchSummary();
-    });
+    }, [projectID]);
 
     // get expenses details
-    useEffect(() => {
-        const fetchExpenses = async () => {
-            const res = await fetch(`/api/projects/${projectID}/budget/expenses`)
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error);
-                return;
-            }
-            setExpenses(data);
-        };
-        fetchExpenses();
-    }, [projectID])
+    const fetchExpenses = async () => {
+        const res = await fetch(`/api/projects/${projectID}/budget/expenses`);
+        const data = await res.json();
+        if (!res.ok) { setError(data.error); return; }
+        setExpenses(data);
+    };
+
+    useEffect(() => {fetchExpenses();}, [projectID]);
+
 
     // add an expense
     const handleAddExpense = async () => {
@@ -120,16 +122,87 @@ export default function RevenuePage() {
         setPayee("");
         setPaymentType("");
         setDateRecorded("");
+        fetchExpenses();
     };
+
+    const displayedExpenses = useMemo(() => {
+        let filtered = [...expenses];
+
+        if (statusFilter !== "all") {
+            filtered = filtered.filter(
+                (item) => item.paymentStatus.toLowerCase() === statusFilter
+            );
+        }
+
+        filtered.sort((a, b) => {
+            const dateA = new Date(a.dateRecorded).getTime();
+            const dateB = new Date(b.dateRecorded).getTime();
+
+            return sortOrder === "asc"
+                ? dateA - dateB
+                : dateB - dateA;
+        });
+
+        return filtered;
+    }, [expenses, sortOrder, statusFilter]);
+
+    const toggleDateSort = () => {
+        setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    };
+
+    //edit row data
+    const saveEdit = async (transactionID:number) => {
+        if (!editingTransactionID) return;
+
+        const res = await fetch(
+        `/api/projects/${projectID}/budget/expenses/${transactionID}`,
+        {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({payee: payee, expenseType: expenseType, dateRecorded: dateRecorded, amount: amount, paymentStatus: paymentStatus}),
+        }
+        );
+        const data = await res.json();
+        if (!res.ok) {setError(data.error); return; }
+        setTransactionID(null);
+        setAmount("");
+        setDescription("");
+        setPaymentStatus("");
+        setPayee("");
+        setPaymentType("");
+        setDateRecorded("");
+        fetchExpenses();
+    }
+
+    //delete row data
+    async function handleDeleteExpense(transactionID: number) {
+        const res = await fetch(
+        `/api/projects/${projectID}/budget/expenses/${transactionID}`,
+        {
+            method: "DELETE",
+        }
+        );
+
+        if (!res.ok) {
+        const err = await res.json();
+        console.error(err)
+        return;
+        }
+
+        console.log("Deleted successfully")
+        fetchExpenses();
+    }
     
     return (
         <div className="bg-[#f5f5f5] w-ful min-h-screen -mx-8 -my-4 p-7">
-            <div className="text-5xl font-semibold text-[var(--main)] mb-7">{projectName} Budget Tracker</div>
+            <div className="text-5xl font-semibold text-[var(--main)] mb-7">
+                <DashboardButton projectID={projectID} />
+                {projectName} Budget Tracker</div>
 
             {/* summary information + expenses button */}
             <div className="grid grid-cols-4 gap-6 mb-7">
                 <div className="bg-white shadow-lg p-2 rounded-lg cursor-pointer" onClick={() =>
-                  router.push(`/projects/${projectID}/budget/revenue`)}>     
+                  router.push(`/projects/${projectID}/budget/revenues`)}>     
                     <p className="text-sm">Total Revenue</p>
                     <p className="mt-3 font-bold text-4xl">P{totalRevenue}</p>   
                 </div>
@@ -145,7 +218,13 @@ export default function RevenuePage() {
                     <p className="mt-3 font-bold text-4xl">P{netIncome}</p>
                 </div>
 
-                <div className="flex items-center">
+                <div className="flex flex-col items-center gap-3">
+                    <select className="bg-white px-3 py-2 rounded-lg shadow" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                        <option value="all">All Status</option>
+                        <option value="paid">Paid</option>
+                        <option value="outstanding">Outstanding</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
                     <button className="btn-primary mt-auto cursor-pointer"  onClick={() => setShowModal(true)}>Add an expense</button>
                 </div>
             </div>
@@ -154,7 +233,11 @@ export default function RevenuePage() {
             <div className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_0.5fr] gap-4 bg-white shadow-lg p-4 rounded-lg">
                 <div className="font-semibold text-sm">Payee</div>
                 <div className="font-semibold text-sm">Type</div>
-                <div className="font-semibold text-sm">Date</div>
+                <div className="font-semibold text-sm">
+                    <button onClick={toggleDateSort} className="font-semibold text-sm text-left cursor-pointer hover:text-blue-600">
+                        Date {sortOrder === "asc" ? "↑" : "↓"}
+                    </button>
+                </div>
                 <div className="font-semibold text-sm">Transaction ID</div>
                 <div className="font-semibold text-sm">Total</div>
                 <div className="font-semibold text-sm">Status</div>
@@ -165,7 +248,7 @@ export default function RevenuePage() {
                 {expenses.length === 0 && !error ? (
                     <p>No expenses listed.</p>
                 ) : (
-                    expenses.map((expense) => (
+                    displayedExpenses.map((expense) => (
                         <div key={expense.transactionID} className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_0.5fr] gap-4 bg-white p-4 rounded-lg">
                             <p>{expense.payee}</p>
                             <p>{expense.expenseType}</p>
@@ -173,13 +256,16 @@ export default function RevenuePage() {
                             <p>{expense.transactionID}</p>
                             <p>{expense.amount}</p>
                             <p>{expense.paymentStatus}</p>
-                            {/* {userID === expense.userID && (
-                                <div className="flex gap-2 mt-2 ml-auto">
+                            {userID === expense.userID && (
+                                <div className="flex flex-row gap-5 ml-auto justify-center">
                                     <button className="cursor-pointer">
-                                        <img src="/edit.svg" width={15} />
+                                        <img src="/edit.svg" width={20} onClick={() => { setTransactionID(expense.transactionID); setPayee(expense.payee); setPaymentType(expense.expenseType); setDateRecorded(expense.dateRecorded); setAmount(expense.amount); setPaymentStatus(expense.paymentStatus);}}/>
+                                    </button>
+                                    <button className="cursor-pointer" onClick= {() => { handleDeleteExpense(expense.transactionID);}}>
+                                        <img src="/delete.svg" width={20} />
                                     </button>
                                 </div>
-                            )} */}
+                            )}
                         </div>
                     ))
                 )}
@@ -226,6 +312,41 @@ export default function RevenuePage() {
                         </div>
                         {error && <p className="text-red-500 mt-2">{error}</p>}
                     </div>
+                </div>
+            )}
+
+            
+            {/* editing modal */}
+            {editingTransactionID && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                <div className="bg-white w-[500px] p-6 rounded-xl shadow-lg">
+
+                    <h2 className="font-bold mb-3">Edit Reply</h2>
+
+                    <textarea className="w-full p-3 border" value={payee} onChange={(e) => setPayee(e.target.value)} rows={1}/>
+                    <textarea className="w-full p-3 border" value={expenseType} onChange={(e) => setPaymentType(e.target.value)} rows={1}/>
+                    <textarea className="w-full p-3 border" value={dateRecorded} onChange={(e) => setDateRecorded(e.target.value)} rows={1}/>
+                    <textarea className="w-full p-3 border" value={amount} onChange={(e) => setAmount(e.target.value)} rows={1}/>
+                    <textarea className="w-full p-3 border" value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)} rows={1}/>
+
+                    <div className="flex gap-2 mt-4">
+                        <button onClick={() => {
+                                setTransactionID(null);
+                                setAmount("");
+                                setDescription("");
+                                setPaymentStatus("");
+                                setPayee("");
+                                setPaymentType("");
+                                setDateRecorded("");
+                            }}>
+                            Cancel
+                        </button>
+
+                        <button onClick={() => saveEdit(editingTransactionID!)} className="btn-primary ml-auto">
+                            Save
+                        </button>
+                    </div>
+                </div>
                 </div>
             )}
         </div>
