@@ -126,7 +126,7 @@ export default function AddTaskModal({ committeeOfAdder, onRefresh }) {
     return (
         <div>
             <button
-                className="bg-[var(--main)] rounded-lg p-1 text-white"
+                className="bg-[var(--main)] rounded-lg p-1 text-white px-2"
                 onClick={() => setIsOpen(true)}
             >
                 Create Task

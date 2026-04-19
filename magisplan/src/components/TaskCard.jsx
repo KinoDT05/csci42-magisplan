@@ -14,7 +14,7 @@ export default function TaskCard({ task, num, userRole, userComm, userID, onRefr
 
         const date = new Date(dateString + "T00:00:00");
 
-        if (isNaN(date.getTime())) return "None"; // 🔥 prevents crash
+        if (isNaN(date.getTime())) return "None"; 
 
         return new Intl.DateTimeFormat("en-GB", {
             day: "numeric",
@@ -30,27 +30,53 @@ export default function TaskCard({ task, num, userRole, userComm, userID, onRefr
     };
 
   return (
-      <motion.div className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_1fr_0.25fr] gap-4  bg-white p-3 items-center shadow-lg rounded-lg"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: num * 0.2 }}
-      >
-          <Link href={task.driveLink ?? "#"}>
-              <div className="font-semibold">{task.taskName}</div>
-          </Link>
+    <motion.div className="grid grid-cols-8 gap-4 px-5 py-3 text-sm text-center items-center rounded-xl hover:bg-white/40 transition-colors"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: num * 0.2 }}
+    >
+
+        <Link href={task.driveLink ?? "#"}>
+            <div className="font-semibold text-center">{task.taskName}</div>
+        </Link>
         
         <div>
-              {isAssigned ? (
-                  task.assignedPerson
-              ) : (
-                  <span>None</span>
-              )}
+                {isAssigned ? (
+                    task.assignedPerson
+                ) : (
+                    <span>None</span>
+                )}
         </div>
-          <div>{task.softDeadline ? formatDate(task.softDeadline) : "None"}</div>
-          <div>{task.hardDeadline ? formatDate(task.hardDeadline) : "None"}</div>
-          <div>{task.blastDate ? formatDate(task.blastDate) : "None"}</div>
-        <div>{task.priority}</div>
-          <div>{formatStatus(task.status)}</div>
+
+        <div>{task.softDeadline ? formatDate(task.softDeadline) : "None"}</div>
+        <div>{task.hardDeadline ? formatDate(task.hardDeadline) : "None"}</div>
+        <div>{task.blastDate ? formatDate(task.blastDate) : "None"}</div>
+        <div>
+            <span
+                className={`badge-pill ${
+                task.priority === "High"
+                    ? "badge-red"
+                    : task.priority === "Medium"
+                    ? "badge-yellow"
+                    : "badge-green"
+                }`}
+            >
+                {task.priority}
+            </span>
+        </div>
+        <div className="flex justify-center">
+            <span
+                className={`badge-pill text-[9px] px-2 max-w-full ${
+                task.status === "NotStarted"
+                    ? "badge-red"
+                    : task.status === "Complete"
+                    ? "badge-green"
+                    : "badge-gray"
+                }`}
+            >
+                {formatStatus(task.status)}
+            </span>
+        </div>
 
         {/* edit/delete button goes here */}
           <div>

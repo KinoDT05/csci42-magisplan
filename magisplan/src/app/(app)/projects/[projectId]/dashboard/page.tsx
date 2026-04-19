@@ -145,7 +145,7 @@ export default function Dashboard() {
                                     ["directory", `/projects/${projectID}/directory`, "Directory"],
                                     ["docs", project?.driveLink ?? "#" , "Document Repository"],
                                     ["tasks", `/projects/${projectID}/tasks`, "Tasks"],
-                                    ["budget", `/projects/${projectID}/budget`, "Budget Tracker"],
+                                    ["budget", `/projects/${projectID}/budget/expenses`, "Budget Tracker"],
                                     ["discussion", `/projects/${projectID}/discussion`, "Discussion Page"],
                             ].map(([icon,redirectLink, label]) => (
                                 <Link
