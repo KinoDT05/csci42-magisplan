@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createDriveFolder } from '@/lib/google-drive';
 
 
 
@@ -27,7 +28,8 @@ export async function POST(req: Request) {
         );
     }
 
-    console.log("Test 1")
+    const result = await createDriveFolder(userID, projectName);
+
     const { data: project, error: projectError } = await supabase
         .from("projects")
         .insert({
@@ -35,11 +37,12 @@ export async function POST(req: Request) {
             projectDescription,
             startDate: new Date(),
             targetDate,
-            driveLink,
+            driveLink: result.webViewLink,
+            ownerID: userID,
+            driveID: result.id
         })
         .select()
         .single();
-    console.log("Test 2")
     if (projectError || !project) {
         return NextResponse.json(
         { error: projectError?.message },
@@ -51,10 +54,14 @@ export async function POST(req: Request) {
     const projectID = project.projectID;
     const moderatorComm = "Moderators";
 
+    const resultMod = await createDriveFolder(userID, "Moderators", result.id);
+
     // Creates a committee for moderator and gets and stores data to modCommData
     const { data: modCommData, error: insertErrorModCommittee } = await supabase.from("committee").insert({
         projectID: projectID,
-        committeeName: moderatorComm
+        committeeName: moderatorComm,
+        driveID: resultMod.id,
+        driveLink: resultMod.webViewLink
     }).select().single();
 
     if (insertErrorModCommittee) {
@@ -85,9 +92,13 @@ export async function POST(req: Request) {
 
 
     for (let i = 0; i < committees.length; i++) {
+        const resultComm = await createDriveFolder(userID, committees[i].name, result.id);
+
         const { error: insertErrorComm } = await supabase.from("committee").insert({
             projectID: project.projectID,
             committeeName: committees[i].name,
+            driveID: resultComm.id,
+            driveLink: resultComm.webViewLink
         });
 
         if (insertErrorComm) {

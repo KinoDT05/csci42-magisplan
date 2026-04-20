@@ -74,7 +74,7 @@ export default function TaskPage() {
  
 
     return (
-        <div className="bg-[#f5f5f5] w-ful min-h-screen -mx-8 -my-4 p-7">
+        <div className="bg-white w-ful min-h-screen -mx-8 -my-4 p-7">
 
             {/* create task and filtering */}
             <div className="flex my-5">
@@ -96,7 +96,7 @@ export default function TaskPage() {
             </div>
             
             {/* header */}
-            <div className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_1fr_0.25fr] gap-4 bg-white shadow-lg font-semibold items-center text-md rounded-lg px-2 py-3 mb-5">
+            <div className="task-table-header grid-cols-8 mb-3">
                 <div>Task</div>
                 <div>Assigned To</div>
                 <div>Soft Deadline</div>
@@ -108,16 +108,19 @@ export default function TaskPage() {
             </div>
             
             {/* task details */}
-            {tasksLoading ? (
-                <p>Loading tasks...</p>
-            ) : tasks.length === 0 ? (
-                <p>No tasks found.</p>
-                ) : (
+            <div className="bg-[#ebebeb] rounded-[1.5rem] p-3 space-y-2 shadow-inner">
+                {tasksLoading ? (
+                    <p>Loading tasks...</p>
+                ) : tasks.length === 0 ? (
+                    <p>No tasks found.</p>
+                    ) : (
 
-                        tasks.map((task, index) => (
-                            <TaskCard key={task.taskID} task={task} num={index} userRole={roleOfUser} userComm={committeeOfUser} userID={userID } onRefresh={fetchTasks} />
-                ))
-            )}
+                            tasks.map((task, index) => (
+                                <TaskCard key={task.taskID} task={task} num={index} userRole={roleOfUser} userComm={committeeOfUser} userID={userID } onRefresh={fetchTasks} />
+                    ))
+                )}
+            </div>
+            
         </div>
     );
 }
