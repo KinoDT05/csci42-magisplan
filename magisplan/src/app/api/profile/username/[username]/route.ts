@@ -1,27 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-// shape of the related row selected from the "projects" table
 type ProjectInfo = {
   projectID: number;
   projectName: string;
-}
+};
 
-// shape of one row sreturned from "project_members" with joined "projects" data
 type MembershipRow = {
   projectID: number;
   role: string;
   projects: ProjectInfo | ProjectInfo[] | null;
 };
 
-export async function GET(_request: NextRequest, context: { params: Promise<{ username: string }> }) {
+export async function GET(
+  _request: NextRequest,
+  context: { params: Promise<{ username: string }> }
+) {
   try {
     const supabase = await createClient();
     const { username } = await context.params;
 
     console.log("[GET /api/profile/username/[username]] username:", username);
 
-    // get details of the user
     const { data: user, error: userError } = await supabase
       .from("users")
       .select(`
@@ -31,11 +31,12 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ us
         middleName,
         lastName,
         contactNumber,
-        username
+        username,
+        profileImageUrl
       `)
       .eq("username", username)
       .maybeSingle();
-    
+
     console.log("[GET profile by username] user:", user);
     console.log("[GET profile by username] userError:", userError);
 
@@ -45,28 +46,26 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ us
         { status: 500 }
       );
     }
-    
+
     if (!user) {
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
       );
     }
-    
-    // get rows from "project_members" entity, and for each row, fetch the
-    // related project's projectID and projectName from "projects" entity
+
     const { data: memberships, error: membershipsError } = await supabase
-    .from("project_members")
-    .select(`
-      projectID,
-      role,
-      projects (
+      .from("project_members")
+      .select(`
         projectID,
-        projectName
-      )
-    `)
-    .eq("userID", user.userID);
-    
+        role,
+        projects (
+          projectID,
+          projectName
+        )
+      `)
+      .eq("userID", user.userID);
+
     console.log("[GET profile by username] memberships:", memberships);
     console.log("[GET profile by username] membershipsError:", membershipsError);
 
@@ -76,13 +75,13 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ us
         { status: 500 }
       );
     }
-    
+
     const typedMemberships: MembershipRow[] = (memberships ?? []).map((member: any) => ({
-        projectID: member.projectID,
-        role: member.role,
-        projects: member.projects,
+      projectID: member.projectID,
+      role: member.role,
+      projects: member.projects,
     }));
-    
+
     const fullName = [
       user.firstName,
       user.middleName,
@@ -90,17 +89,13 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ us
     ]
       .filter(Boolean)
       .join(" ");
-    
-    console.log("[GET profile by username] memberships raw:", memberships);
-    console.log("[GET profile by username] first membership:", memberships?.[0]);
-    console.log("[GET profile by username] first membership projects:", memberships?.[0]?.projects);
 
     const formattedProjects = typedMemberships.map((member) => ({
-    projectID: member.projectID,
-    projectName: Array.isArray(member.projects)
+      projectID: member.projectID,
+      projectName: Array.isArray(member.projects)
         ? member.projects[0]?.projectName ?? ""
         : member.projects?.projectName ?? "",
-    role: member.role,
+      role: member.role,
     }));
 
     console.log("[GET profile by username] formattedProjects:", formattedProjects);
@@ -115,12 +110,13 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ us
         emailAddress: user.emailAddress,
         contactNumber: user.contactNumber,
         username: user.username,
+        profileImageUrl: user.profileImageUrl,
         projects: formattedProjects,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("GET /api/profile/[id] error:", error);
+    console.error("GET /api/profile/username/[username] error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

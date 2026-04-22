@@ -1,11 +1,9 @@
-export default function List({data = [] }) {
-    const numCols = columns.length;
-
+export default function List({ data = [] }) {
     return (
-        <ul>
-            {data.map((t) => (
-                <li key={t.id}>
-                    {t.id}: {t.desc}
+        <ul className="space-y-1">
+            {data.map((event) => (
+                <li key={event.eventID} className="text-[10px] leading-tight bg-blue-100 text-blue-800 p-1 rounded truncate">
+                    {event.eventName}
                 </li>
             ))}
         </ul>

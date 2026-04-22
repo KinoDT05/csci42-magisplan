@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createDriveFolder } from '@/lib/google-drive';
 
-
-
 export async function POST(req: Request) {
     const supabase = await createClient();
     const {
@@ -53,6 +51,8 @@ export async function POST(req: Request) {
     // Get projectID to be passed down to the next entities to be madee
     const projectID = project.projectID;
     const moderatorComm = "Moderators";
+
+    console.log(userID, result.id);
 
     const resultMod = await createDriveFolder(userID, "Moderators", result.id);
 
