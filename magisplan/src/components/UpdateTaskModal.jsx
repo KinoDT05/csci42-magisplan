@@ -80,7 +80,7 @@ export default function UpdateTaskModal({ taskID, taskStatus, taskName, userRole
     return (
         <div>
             <button
-                className="bg-[var(--main)] rounded-lg p-1 text-white"
+                className="btn-secondary"
                 onClick={() => setIsOpen(true)}
             >
                 Update
@@ -139,7 +139,7 @@ export default function UpdateTaskModal({ taskID, taskStatus, taskName, userRole
                     <button
                         disabled={isSubmitting}
                         type="submit"
-                        className="w-full bg-blue-900 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+                        className="w-full btn-secondary"
                     >
                         {isSubmitting ? "Updating..." : "Update Task"}
                     </button>

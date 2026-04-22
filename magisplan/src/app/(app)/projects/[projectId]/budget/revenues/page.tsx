@@ -41,6 +41,21 @@ export default function RevenuePage() {
     const [statusFilter, setStatusFilter] = useState("all");
     const [editingTransactionID, setTransactionID] = useState<number | null>(null);
 
+
+    const formatDate = (dateString) => {
+        if (!dateString) return "None";
+
+        const date = new Date(dateString + "T00:00:00");
+
+        if (isNaN(date.getTime())) return "None"; 
+
+        return new Intl.DateTimeFormat("en-GB", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        }).format(date);
+    };
+    
     //get user 
     useEffect(() => {
       const getUser = async () => {
@@ -71,21 +86,21 @@ export default function RevenuePage() {
     }, [projectID]);
 
     // get summary information
-    useEffect(() => {
-        const fetchSummary = async () => {
-            const res = await fetch(`/api/projects/${projectID}/budget/summary`)
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error);
-                return;
-            }
-            setTotalExpenses(data.totalExpenses);
-            setTotalRevenue(data.totalRevenue);
-            setNetIncome(data.netIncome);
-        };
+    const fetchSummary = async () => {
+        const res = await fetch(`/api/projects/${projectID}/budget/summary`);
+        const data = await res.json();
 
-        if (projectID) fetchSummary();
-    }, [projectID]);
+        if (!res.ok) {
+            setError(data.error);
+            return;
+        }
+
+        setTotalExpenses(data.totalExpenses);
+        setTotalRevenue(data.totalRevenue);
+        setNetIncome(data.netIncome);
+    };
+
+    useEffect(() => {fetchSummary();}, [projectID]);
 
     // get revenues details
     const fetchRevenue = async () => {
@@ -122,6 +137,7 @@ export default function RevenuePage() {
         setPaymentType("");
         setDateRecorded("");
         fetchRevenue();
+        fetchSummary();
     };
 
 
@@ -173,6 +189,7 @@ export default function RevenuePage() {
         setPaymentType("");
         setDateRecorded("");
         fetchRevenue();
+        fetchSummary();
     }
 
     //delete row data
@@ -192,6 +209,7 @@ export default function RevenuePage() {
 
         console.log("Deleted successfully")
         fetchRevenue();
+        fetchSummary();
     }
     
     return (
@@ -231,7 +249,7 @@ export default function RevenuePage() {
             </div>
 
             {/* revenue table header */}
-            <div className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_0.5fr] gap-4 bg-white shadow-lg p-4 rounded-lg">
+            <div className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_0.5fr] gap-4 bg-white shadow-lg p-4 rounded-xl text-center items-center font-semibold text-sm text-gray-700">
                 <div className="font-semibold text-sm">Payer</div>
                 <div className="font-semibold text-sm">Type</div>
                 <div className="font-semibold text-sm">
@@ -250,10 +268,10 @@ export default function RevenuePage() {
                     <p>No revenues listed.</p>
                 ) : (
                     displayedRevenues.map((revenue) => (
-                        <div key={revenue.transactionID} className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_0.5fr] gap-4 bg-white p-4 rounded-lg">
+                        <div key={revenue.transactionID} className="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_0.5fr] gap-4 bg-white p-4 rounded-xl items-center text-center shadow-sm hover:shadow-md transition mb-3">
                             <p>{revenue.payer}</p>
                             <p>{revenue.revenueType}</p>
-                            <p>{revenue.dateRecorded}</p>
+                            <p>{formatDate(revenue.dateRecorded)}</p>
                             <p>{revenue.transactionID}</p>
                             <p>{revenue.amount}</p>
                             <p>{revenue.paymentStatus}</p>
@@ -274,80 +292,85 @@ export default function RevenuePage() {
 
             {/* add revenue modal  */}
             {showModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-                    <div className="bg-white w-[500px] max-w-[90%] rounded-xl shadow-lg p-6">
-                        {/* header */}
-                        <div className="flex">
-                        <button className="cursor-pointer font-semibold" onClick={() => { 
-                            setShowModal(false);
-                            setError("");
-                            setAmount("");
-                            setDescription("");
-                            setPaymentStatus("");
-                            setPayer("");
-                            setPaymentType("");
-                            setDateRecorded("");
-                        }}>Cancel</button>
-                        <button className="cursor-pointer btn-primary ml-auto" onClick={handleAddExpense} disabled={submitting}>{submitting ? "Submitting..." : "Add Revenue"}</button>
-                        </div>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+                <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
 
-                        <hr className="mt-3"></hr>
-                        
-                        {/* content */}
-                        
-                        <textarea className="w-full p-3 mt-2" placeholder="Enter payer" value={payer} onChange={(e) => setPayer(e.target.value)} rows={1} />
-                        <textarea className="w-full p-3 mt-2" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} rows={1} />
-                        <textarea className="w-full p-3 mt-2" placeholder="Enter description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} rows={1} />
-                        <select id="statusSelect" className="text-[var(--txt-gray)] w-full p-3 mt-2" value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)}>
-                            <option value="">Enter payment status</option>
-                            <option className="text-black" value="paid">Paid</option>
-                            <option className="text-black" value="outstanding">Outstanding</option>
-                            <option className="text-black" value="overdue">Overdue</option>
-                        </select>
-                
-                        <textarea className="w-full p-3 mt-2" placeholder="Enter payment type" value={revenueType} onChange={(e) => setPaymentType(e.target.value)} rows={1} />
-                        
-                        <div className="flex gap-6">
-                            <p className="w-full p-3 mt-2 text-[var(--txt-gray)]">Place date recorded</p>
-                            <input type="date" className="px-2" value={dateRecorded} onChange={(e) => setDateRecorded(e.target.value)} />
-                        </div>
-                        {error && <p className="text-red-500 mt-2">{error}</p>}
-                    </div>
+                <h2 className="text-2xl font-semibold text-[var(--main)] mb-5">Add Revenue</h2>
+
+                <div className="flex flex-col gap-4">
+
+                    <input className="input-field" placeholder="Payer" value={payer} onChange={(e) => setPayer(e.target.value)} />
+                    <input className="input-field" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
+                    <input className="input-field" placeholder="Revenue Type" value={revenueType} onChange={(e) => setPaymentType(e.target.value)} />
+                    <input className="input-field" placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} />
+
+                    <select className="input-field" value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)}>
+                    <option value="">Select Status</option>
+                    <option value="paid">Paid</option>
+                    <option value="outstanding">Outstanding</option>
+                    <option value="overdue">Overdue</option>
+                    </select>
+
+                    <input className="input-field" type="date" value={dateRecorded} onChange={(e) => setDateRecorded(e.target.value)} />
+
                 </div>
+
+                <div className="flex gap-3 pt-5">
+                    <button className="cursor-pointer" onClick={() => { setShowModal(false); setError(""); }}>Cancel</button>
+
+                    <button className="btn-primary ml-auto" onClick={handleAddExpense} disabled={submitting}>
+                    {submitting ? "Saving..." : "Add Revenue"}
+                    </button>
+                </div>
+
+                </div>
+            </div>
             )}
 
             {/* editing modal */}
             {editingTransactionID && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-                <div className="bg-white w-[500px] p-6 rounded-xl shadow-lg">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+                <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
 
-                    <h2 className="font-bold mb-3">Edit Reply</h2>
+                <h2 className="text-2xl font-semibold text-[var(--main)] mb-5">Edit Revenue</h2>
 
-                    <textarea className="w-full p-3 border" value={payer} onChange={(e) => setPayer(e.target.value)} rows={1}/>
-                    <textarea className="w-full p-3 border" value={revenueType} onChange={(e) => setPaymentType(e.target.value)} rows={1}/>
-                    <textarea className="w-full p-3 border" value={dateRecorded} onChange={(e) => setDateRecorded(e.target.value)} rows={1}/>
-                    <textarea className="w-full p-3 border" value={amount} onChange={(e) => setAmount(e.target.value)} rows={1}/>
-                    <textarea className="w-full p-3 border" value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)} rows={1}/>
+                <div className="flex flex-col gap-4">
 
-                    <div className="flex gap-2 mt-4">
-                        <button onClick={() => {
-                                setTransactionID(null);
-                                setAmount("");
-                                setDescription("");
-                                setPaymentStatus("");
-                                setPayer("");
-                                setPaymentType("");
-                                setDateRecorded("");
-                            }}>
-                            Cancel
-                        </button>
+                    <input className="input-field" value={payer} onChange={(e) => setPayer(e.target.value)} />
+                    <input className="input-field" value={amount} onChange={(e) => setAmount(e.target.value)} />
+                    <input className="input-field" value={revenueType} onChange={(e) => setPaymentType(e.target.value)} />
+                    <input className="input-field" value={description} onChange={(e) => setDescription(e.target.value)} />
 
-                        <button onClick={() => saveEdit(editingTransactionID!)} className="btn-primary ml-auto">
-                            Save
-                        </button>
-                    </div>
+                    <select className="input-field" value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)}>
+                    <option value="paid">Paid</option>
+                    <option value="outstanding">Outstanding</option>
+                    <option value="overdue">Overdue</option>
+                    </select>
+
+                    <input className="input-field" type="date" value={dateRecorded} onChange={(e) => setDateRecorded(e.target.value)} />
+
                 </div>
+
+                <div className="flex gap-3 pt-5">
+                    <button className="cursor-pointer" onClick={() => {
+                    setTransactionID(null);
+                    setPayer("");
+                    setAmount("");
+                    setPaymentType("");
+                    setDescription("");
+                    setPaymentStatus("");
+                    setDateRecorded("");
+                    }}>
+                    Cancel
+                    </button>
+
+                    <button className="btn-primary ml-auto" onClick={() => saveEdit(editingTransactionID!)}>
+                    Save Changes
+                    </button>
                 </div>
+
+                </div>
+            </div>
             )}
         </div>
     );

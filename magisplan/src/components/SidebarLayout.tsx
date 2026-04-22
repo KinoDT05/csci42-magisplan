@@ -48,22 +48,17 @@ export default function SidebarLayout({
         <nav>
           <ul>
             <li>
-              <p className="text-2xl font-bold text-white py-5">
-                MagisPlan
-              </p>
+              <div className="flex items-center px-3 py-5">
+                <span className="titleEx text-2xl font-bold text-white">
+                  MagisPlan
+                </span>
+              </div>
             </li>
 
             <li>
               <Link href="/user/dashboard">
                 <img src="/home.svg" width={30} />
                 <span>Home</span>
-              </Link>
-            </li>
-
-            <li>
-              <Link href="#">
-                <img src="/chat.svg" width={30} />
-                <span>Chat</span>
               </Link>
             </li>
 

@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from '@/lib/supabase/client';
 import { useParams } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient"
 import AddTaskModal from "@/components/AddTaskModal";
 import TaskCard from "@/components/TaskCard";
+import DashboardButton from "@/components/BackToDashboard";
 
 export default function TaskPage() {
     const params = useParams();
@@ -17,6 +19,27 @@ export default function TaskPage() {
     const [tasks, setTasks] = useState([]);
     const [committeeTask, setCommitteeTask] = useState("");
     const [userID, setUserID] = useState("");
+    const [projectName, setProjectName] = useState(""); 
+
+    // get project name
+    useEffect(() => {
+        const fetchProject = async () => {
+            const { data, error } = await supabase
+                .from("projects")
+                .select("projectName")
+                .eq("projectID", projectID)
+                .single();
+            
+            if (error) {
+                console.error(error);
+            } else {
+                setProjectName(data.projectName);
+            }
+        };
+
+        fetchProject();
+    }, [projectID]);
+
     // 1. Initial Load: User data and Committee list
     useEffect(() => {
         const supabase = createClient();
@@ -76,6 +99,11 @@ export default function TaskPage() {
     return (
         <div className="bg-white w-ful min-h-screen -mx-8 -my-4 p-7">
 
+            <div className="text-5xl font-semibold text-[var(--main)] mb-7">
+                <DashboardButton projectID={projectID} />
+                {projectName} Tasks Page
+            </div>
+
             {/* create task and filtering */}
             <div className="flex my-5">
                 {!loading && committeeOfUser && (
@@ -84,7 +112,7 @@ export default function TaskPage() {
 
                 <select
                     value={committeeTask}
-                    onChange={(e) => setCommitteeTask(e.target.value)} className="border text-[var(--main)] ml-auto font-bold"
+                    onChange={(e) => setCommitteeTask(e.target.value)} className="border px-2 text-[var(--main)] ml-auto font-bold"
                 >
                     <option value="">All</option>
                     {committees.map((committee) => (

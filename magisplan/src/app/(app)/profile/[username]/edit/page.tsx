@@ -154,100 +154,102 @@ export default function EditProfilePage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto bg-[var(--bg-gray)] p-10">
-      <h1 className="text-5xl font-semibold mb-6 text-[var(--main)]">Edit Profile</h1>
+    <div className="min-h-screen flex items-center justify-center px-6">
+      <div className="w-full max-w-xl bg-[var(--bg-gray)] p-10 rounded-2xl">
+        <h1 className="text-5xl font-semibold mb-6 text-[var(--main)]">Edit Profile</h1>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col items-center gap-4 mb-4">
-          <div className="w-40 h-40 rounded-full overflow-hidden bg-[var(--txt-gray)] flex items-center justify-center">
-            {previewUrl ? (
-              <img
-                src={previewUrl}
-                alt="New profile preview"
-                className="w-full h-full object-cover"
-              />
-            ) : existingImageUrl ? (
-              <img
-                src={existingImageUrl}
-                alt="Current profile"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <p className="text-white text-center px-2">No Available Image</p>
-            )}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col items-center gap-4 mb-4">
+            <div className="w-40 h-40 rounded-full overflow-hidden bg-[var(--txt-gray)] flex items-center justify-center">
+              {previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt="New profile preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : existingImageUrl ? (
+                <img
+                  src={existingImageUrl}
+                  alt="Current profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <p className="text-white text-center px-2">No Available Image</p>
+              )}
+            </div>
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                console.log("[EditProfilePage] selected file:", file);
+                setSelectedFile(file);
+              }}
+              className="input-field"
+            />
           </div>
 
           <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0] ?? null;
-              console.log("[EditProfilePage] selected file:", file);
-              setSelectedFile(file);
-            }}
+            name="firstName"
+            value={form.firstName}
+            onChange={handleChange}
+            placeholder="First Name"
             className="input-field"
           />
+
+          <input
+            name="middleName"
+            value={form.middleName}
+            onChange={handleChange}
+            placeholder="Middle Name"
+            className="input-field"
+          />
+
+          <input
+            name="lastName"
+            value={form.lastName}
+            onChange={handleChange}
+            placeholder="Last Name"
+            className="input-field"
+          />
+
+          <input
+            name="contactNumber"
+            value={form.contactNumber}
+            onChange={handleChange}
+            placeholder="Contact Number"
+            className="input-field"
+          />
+
+          <input
+            name="username"
+            value={form.username}
+            onChange={handleChange}
+            placeholder="Username"
+            className="input-field"
+          />
+
+          <div className="flex">
+            <button
+              onClick={() => router.back()}
+              className="font-semibold cursor-pointer"
+              type="button"
+            >
+              Cancel
+            </button>
+
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="btn-primary ml-auto"
+              type="button"
+            >
+              {loading ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
         </div>
-
-        <input
-          name="firstName"
-          value={form.firstName}
-          onChange={handleChange}
-          placeholder="First Name"
-          className="input-field"
-        />
-
-        <input
-          name="middleName"
-          value={form.middleName}
-          onChange={handleChange}
-          placeholder="Middle Name"
-          className="input-field"
-        />
-
-        <input
-          name="lastName"
-          value={form.lastName}
-          onChange={handleChange}
-          placeholder="Last Name"
-          className="input-field"
-        />
-
-        <input
-          name="contactNumber"
-          value={form.contactNumber}
-          onChange={handleChange}
-          placeholder="Contact Number"
-          className="input-field"
-        />
-
-        <input
-          name="username"
-          value={form.username}
-          onChange={handleChange}
-          placeholder="Username"
-          className="input-field"
-        />
-
-        <div className="flex">
-          <button
-            onClick={() => router.back()}
-            className="font-semibold cursor-pointer"
-            type="button"
-          >
-            Cancel
-          </button>
-
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="btn-primary ml-auto"
-            type="button"
-          >
-            {loading ? "Saving..." : "Save Changes"}
-          </button>
         </div>
-      </div>
     </div>
   );
 }

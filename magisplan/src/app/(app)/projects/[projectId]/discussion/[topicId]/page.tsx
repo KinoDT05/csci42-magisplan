@@ -234,7 +234,7 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ pro
           <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <div className="bg-white w-[500px] p-6 rounded-xl shadow-lg">
 
-              <h2 className="font-bold text-[var(--main)] mb-3">Edit Reply</h2>
+              <h2 className="font-bold text-lg text-[var(--main)] mb-3">Edit Reply</h2>
 
               <textarea className="w-full p-3 border" value={editContent} onChange={(e) => setEditContent(e.target.value)} rows={4}/>
 
@@ -271,7 +271,7 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ pro
                 <button onClick={() => saveThreadEdit(topicId!)} className="btn-primary justify-end">
                 Save
               </button>
-              </div>
+              </div> 
             </div>
           </div>
         </div>

@@ -143,7 +143,6 @@ export default function Dashboard() {
                             {[
                                     ["calendar", `/projects/${projectID}/calendar`, "Calendar"],
                                     ["directory", `/projects/${projectID}/directory`, "Directory"],
-                                    ["docs", project?.driveLink ?? "#" , "Document Repository"],
                                     ["tasks", `/projects/${projectID}/tasks`, "Tasks"],
                                     ["budget", `/projects/${projectID}/budget/expenses`, "Budget Tracker"],
                                     ["discussion", `/projects/${projectID}/discussion`, "Discussion Page"],

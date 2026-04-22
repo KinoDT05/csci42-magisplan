@@ -79,6 +79,7 @@ export default function DiscussionPage({ params }: { params: Promise<{ projectId
     setShowModal(false);
     setTopicContent("");
     setTopicName("");
+    fetchTopics();
   };
 
   //get user 
@@ -206,17 +207,17 @@ export default function DiscussionPage({ params }: { params: Promise<{ projectId
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white w-[500px] p-6 rounded-xl shadow-lg">
 
-            <h2 className="font-bold mb-3">Edit Reply</h2>
+            <h2 className="font-bold text-lg mb-3">Edit Thread</h2>
 
-            <textarea className="w-full p-3 border" value={titleContent} onChange={(e) => setEditTopicTitle(e.target.value)} rows={1}/>
-            <textarea className="w-full p-3 border" value={topicContent} onChange={(e) => setEditTopicContent(e.target.value)} rows={4}/>
+            <textarea className="w-full p-3 rounded-xl border" value={titleContent} onChange={(e) => setEditTopicTitle(e.target.value)} rows={1}/>
+            <textarea className="w-full p-3 rounded-xl border" value={topicContent} onChange={(e) => setEditTopicContent(e.target.value)} rows={4}/>
 
-            <div className="flex justify-end gap-2 mt-4">
-              <button onClick={() => {setTopicReplyId(null); setEditTopicTitle(""); setEditTopicContent("");}}>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => {setTopicReplyId(null); setEditTopicTitle(""); setEditTopicContent("");}} className="cursor-pointer">
                 Cancel
               </button>
 
-              <button onClick={() => saveEdit(editingTopicId!)} className="btn-primary">
+              <button onClick={() => saveEdit(editingTopicId!)} className="btn-primary ml-auto">
                 Save
               </button>
             </div>
