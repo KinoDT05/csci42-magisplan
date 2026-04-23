@@ -21,20 +21,30 @@ type EventType = {
 
 export default function CalendarPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = use(params);
-
   const [projectName, setProjectName] = useState("");
   const [projectTargetDate, setProjectTargetDate] = useState<Date | null>(null);
   const [projectCreatedAt, setProjectCreatedAt] = useState<Date | null>(null);
-  
   const [events, setEvents] = useState<EventType[]>([]);
   const [error, setError] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date()); 
-
   const [showModal, setShowModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EventType | null>(null);
+  const [userRole, setUserRole] = useState<string>("");
 
   useEffect(() => {
-    const fetchProject = async () => {
+    const fetchProjectandUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: roleData } = await supabase
+          .from("project_members")
+          .select("role")
+          .eq("projectID", projectId)
+          .eq("userID", user.id)
+          .single();
+          
+        if (roleData) setUserRole(roleData.role);
+      }
+
       const { data, error } = await supabase
         .from("projects")
         .select("projectName, targetDate, datetimeCreated")
@@ -51,7 +61,7 @@ export default function CalendarPage({ params }: { params: Promise<{ projectId: 
         }
       }
     };
-    fetchProject();
+    fetchProjectandUser();
   }, [projectId]);
 
   const fetchEvents = async () => {
@@ -112,12 +122,14 @@ export default function CalendarPage({ params }: { params: Promise<{ projectId: 
             <h1 className="text-[2.5rem] font-bold text-[var(--main)] tracking-tight">
               {projectName ? `${projectName} Calendar` : "Loading Calendar..."}
             </h1>
-            <button 
-                onClick={openCreateModal}
-                className="bg-[#33415C] text-white px-5 py-2 rounded-full font-medium hover:bg-opacity-90 transition shadow-sm"
-            >
-              Schedule event
-            </button>
+            {(userRole === "Moderator" || userRole === "Head") && (
+                <button 
+                    onClick={openCreateModal}
+                    className="bg-[#33415C] text-white px-5 py-2 rounded-full font-medium hover:bg-opacity-90 transition shadow-sm"
+                >
+                Schedule event
+                </button>
+            )}
         </div>
 
         <div className="flex justify-between items-end mb-6">
@@ -189,6 +201,7 @@ export default function CalendarPage({ params }: { params: Promise<{ projectId: 
           onRefresh={fetchEvents} 
           projectId={projectId as string}
           editingEvent={editingEvent}
+          userRole={userRole}
         />
       </div>
   );
