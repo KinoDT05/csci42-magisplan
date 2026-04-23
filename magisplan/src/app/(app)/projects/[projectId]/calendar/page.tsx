@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import EventModal from "@/components/EventModal";
+import DashboardButton from "@/components/BackToDashboard";
 
 type EventType = {
   eventID: number;
@@ -104,9 +105,10 @@ export default function CalendarPage({ params }: { params: Promise<{ projectId: 
   const actualDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   return (
-      <div className="bg-[#f5f5f5] w-full min-h-screen p-10 font-sans overflow-x-hidden">
+      <div className="bg-[#f5f5f5] w-ful min-h-screen -mx-8 -my-4 p-7">
         
         <div className="flex justify-between items-start mt-4 mb-12">
+            <DashboardButton projectID={projectId} />
             <h1 className="text-[2.5rem] font-bold text-[var(--main)] tracking-tight">
               {projectName ? `${projectName} Calendar` : "Loading Calendar..."}
             </h1>
