@@ -30,17 +30,14 @@ export default function Dashboard() {
     const projectID = Array.isArray(params.projectId)
         ? params.projectId[0]
         : params.projectId;
-        
     const [tasks, setTasks] = useState<Task[]>([]);
     const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
     const [project, setProject] = useState<Project | null>(null);
-    
     const [filter, setFilter] = useState<"all" | "mine">("all");
     const [userId, setUserId] = useState<string | null>(null);
     const [daysLeft, setDaysLeft] = useState<number>(0);
-    
+    const [userRole, setUserRole] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
     useEffect(() => {
@@ -48,9 +45,21 @@ export default function Dashboard() {
             const supabase = await createClient();
             const { data: { user } } = await supabase.auth.getUser();
             setUserId(user?.id ?? null);
+            if (user && projectID) {
+                const { data: roleData } = await supabase
+                    .from("project_members")
+                    .select("role")
+                    .eq("projectID", projectID)
+                    .eq("userID", user.id)
+                    .single();
+                
+                if (roleData) {
+                    setUserRole(roleData.role);
+                }
+            }
         };
         initUser();
-    }, []);
+    }, [projectID]);
     
     const getProject = async () => {
         const supabase = await createClient();
@@ -187,12 +196,14 @@ export default function Dashboard() {
                             </button>
                         </div>
                         
-                        <button 
-                            onClick={() => setIsInviteModalOpen(true)}
-                            className="bg-[var(--accent)] text-white px-5 py-2.5 rounded-lg font-bold shadow-sm hover:opacity-90 transition text-sm flex items-center gap-2"
-                        >
-                            Invite User <span>+</span>
-                        </button>
+                        {userRole === "Moderator" && (
+                            <button 
+                                onClick={() => setIsInviteModalOpen(true)}
+                                className="bg-[var(--accent)] text-white px-5 py-2.5 rounded-lg font-bold shadow-sm hover:opacity-90 transition text-sm flex items-center gap-2"
+                            >
+                                Invite User <span>+</span>
+                            </button>
+                        )}
                     </div>
 
                     {/* Tasks Table */}
