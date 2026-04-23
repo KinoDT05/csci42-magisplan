@@ -1,4 +1,4 @@
-export default function InvitesList({ invites, onRespond }) {
+export default function InvitesList({ invites, onRespond, isConnected, onRequireGoogle }) {
     const respondToInvite = async (committeeID, role, response) => {
         const res = await fetch(`/api/user/respond-invite?committee=${committeeID}&role=${role}&response=${response}`, {
             method: "POST",
@@ -12,27 +12,40 @@ export default function InvitesList({ invites, onRespond }) {
     };
 
     return (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
             {invites.map((invite, index) => (
-                <li key={index} className="rounded-xl p-4 shadow-sm space-y-1">
-                    <p className="font-bold text-lg">{invite.projectName}</p>
-                    <p className="text-gray-500 text-sm">{invite.projectDescription}</p>
-                    <p className="text-sm">Committee: <span className="font-medium">{invite.committeeName}</span></p>
-                    <p className="text-sm">Role: <span className="font-medium">{invite.role}</span></p>
-                    <button
-                        style={{ backgroundColor: "#16a34a" }}
-                        className="text-white px-4 py-1 rounded-lg text-sm"
-                        onClick={() => respondToInvite(invite.committeeID, invite.role, "accept")}
-                    >
-                        Accept
-                    </button>
-                    <button
-                        style={{ backgroundColor: "#dc2626" }}
-                        className="text-white px-4 py-1 rounded-lg text-sm"
-                        onClick={() => respondToInvite(invite.committeeID, invite.role, "deny")}
-                    >
-                        Deny
-                    </button>
+                <li key={index} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-2">
+                    <div>
+                        <p className="font-bold text-[var(--main)] text-lg">{invite.projectName}</p>
+                        <p className="text-gray-500 text-xs mt-1">{invite.projectDescription}</p>
+                    </div>
+                    
+                    <div className="pt-1">
+                        <p className="text-sm text-gray-600">Committee: <span className="font-bold text-gray-900">{invite.committeeName}</span></p>
+                        <p className="text-sm text-gray-600">Role: <span className="font-bold text-gray-900">{invite.role}</span></p>
+                    </div>
+                    
+                    <div className="flex gap-3 pt-3">
+                        <button
+                            className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors flex-1 shadow-sm"
+                            onClick={() => {
+                                if (!isConnected) {
+                                    onRequireGoogle();
+                                } else {
+                                    respondToInvite(invite.committeeID, invite.role, "accept");
+                                }
+                            }}
+                        >
+                            Accept
+                        </button>
+                        
+                        <button
+                            className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors flex-1 shadow-sm"
+                            onClick={() => respondToInvite(invite.committeeID, invite.role, "deny")}
+                        >
+                            Deny
+                        </button>
+                    </div>
                 </li>
             ))}
         </ul>

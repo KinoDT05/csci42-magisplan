@@ -10,6 +10,8 @@ import UserTaskList from "@/components/UserTaskList";
 import GoogleSetting from "@/components/GoogleSetting";
 import CreateFolderTest from "@/components/CreateFolderTest";
 import LogoutButton from "@/components/LogoutButton";
+import Modal from "@/components/Modal";
+
 interface Projects {
     targetDate: string;
     projectName: string;
@@ -43,6 +45,7 @@ export default function Dashboard() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [userConnection, setUserConnection] = useState(false);
     const [loading, setLoading] = useState(true)
+    const [showGooglePrompt, setShowGooglePrompt] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState("");
     const [activeTab, setActiveTab] = useState<"all" | "active" | "archived">("all");
@@ -153,6 +156,12 @@ export default function Dashboard() {
                         <div className="flex justify-end pt-6 border-t border-gray-100 shrink-0">
                             <Link 
                                 href="/moderator/create-project"
+                                onClick={(e) => {
+                                    if (!userConnection) {
+                                        e.preventDefault();
+                                        setShowGooglePrompt(true);
+                                    }
+                                }}
                                 className="bg-[var(--accent)] text-white px-6 py-3 rounded-lg font-bold shadow-md hover:opacity-90 transition flex items-center gap-2"
                             >
                                 Create new project <span>+</span>
@@ -183,12 +192,33 @@ export default function Dashboard() {
                                     <p className="text-sm font-medium">No pending invites.</p>
                                 </div>
                             ) : (
-                                <InvitesList invites={invites} onRespond={getAll} />
+                                <InvitesList 
+                                    invites={invites} 
+                                    onRespond={getAll}
+                                    isConnected={userConnection}
+                                    onRequireGoogle={() => setShowGooglePrompt(true)} 
+                                />
                             )}
                         </div>
                     </div>
                 </div>
             </div>
+            <Modal isOpen={showGooglePrompt} onClose={() => setShowGooglePrompt(false)} title="">
+                <div className="text-center space-y-6 pb-2">
+                    <div className="bg-red-100 text-red-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-3xl font-bold">
+                        !
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-[var(--main)] mb-2">Google Connection Required</h3>
+                    </div>
+                    <button 
+                        onClick={() => setShowGooglePrompt(false)} 
+                        className="w-full bg-[var(--main)] text-white font-bold py-3 rounded-lg hover:opacity-90 transition"
+                    >
+                        Okay
+                    </button>
+                </div>
+            </Modal>
         </>
     );
 }
