@@ -25,7 +25,7 @@ export default function LoginPage() {
         setError(data.error);
     }
 
-      router.push("/moderator/create-project");
+      router.push("/user/dashboard");
     
   }
 

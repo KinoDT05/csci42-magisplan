@@ -33,6 +33,7 @@ export default function InvitesList({ invites, onRespond, isConnected, onRequire
                                     onRequireGoogle();
                                 } else {
                                     respondToInvite(invite.committeeID, invite.role, "accept");
+                                    onRespond();
                                 }
                             }}
                         >
