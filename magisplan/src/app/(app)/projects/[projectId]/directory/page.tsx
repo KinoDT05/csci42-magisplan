@@ -3,10 +3,12 @@
 import { useState, useEffect, use } from "react";
 import { createClient } from "@/lib/supabase/client";
 import DashboardButton from "@/components/BackToDashboard";
+import Link from "next/link";
 
 interface Member {
   userID: string;
   displayName: string;
+  username: string
   role: string;
   dateJoined: string;
   committeeName: string | null;
@@ -117,25 +119,29 @@ export default function ProjectDirectoryPage({ params }: { params: Promise<{ pro
             <p className="p-6 text-sm text-gray-500 text-center font-medium">No members found in this project.</p>
           ) : (
             members.map((member) => (
-              <div 
-                key={member.userID} 
-                className="grid grid-cols-4 px-5 py-3 text-sm text-center items-center rounded-xl hover:bg-[#e0e0e0] transition-colors"
+              <Link
+                key={member.userID}
+                href={`/profile/${member.username}`}
+                className="grid grid-cols-4 px-5 py-3 text-sm text-center items-center rounded-xl hover:bg-[#e0e0e0] transition-colors block"
               >
                 <div className="flex justify-center">
                   <span className="text-gray-700 font-medium text-xs">
                     {`${member.firstName} ${member.lastName}`}
                   </span>
                 </div>
+
                 <p className="text-gray-700 font-medium text-xs">
                   {member.contactNumber || member.emailAddress || "No contact info"}
                 </p>
+
                 <p className="text-gray-800 font-bold">
                   {member.committeeName || "Moderator Core"}
                 </p>
+
                 <p className="text-gray-700 capitalize">
                   {member.role.toLowerCase()}
                 </p>
-              </div>
+              </Link>
             ))
           )}
         </div>

@@ -16,7 +16,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
       displayName,
       role,
       dateJoined,
-      user:users(firstName, middleName, lastName, emailAddress, contactNumber),
+      user:users(firstName, middleName, lastName, username, emailAddress, contactNumber),
       committee:committee(committeeName)
     `)
     .eq("projectID", projectId);
@@ -34,6 +34,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
     firstName: row.user?.firstName ?? null,
     middleName: row.user?.middleName ?? null,
     lastName: row.user?.lastName ?? null,
+    username: row.user?.username ?? null,
     emailAddress: row.user?.emailAddress ?? null,
     contactNumber: row.user?.contactNumber ?? null,
   }));

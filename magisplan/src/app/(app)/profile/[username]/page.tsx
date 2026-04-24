@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabaseClient";
 
 type ProfileData = {
   userID: string;
@@ -27,6 +28,7 @@ export default function ProfilePage() {
 
   const [user, setUser] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,6 +63,30 @@ export default function ProfilePage() {
     }
   }, [username]);
 
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: authData } = await supabase.auth.getUser();
+
+      const authUserId = authData.user?.id;
+      if (!authUserId) return;
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("username")
+        .eq("userID", authUserId)
+        .single();
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setCurrentUsername(data.username);
+    };
+
+    getCurrentUser();
+  }, []);
+
   return (
     <div className="w-full px-6 py-6">
       <div className="flex flex-col md:flex-row items-center gap-6 mb-20">
@@ -94,13 +120,15 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="md:ml-auto">
-          <Link href={`/profile/${username}/edit`}>
-            <div className="btn-secondary font-semibold">
-              Edit Details
-            </div>
-          </Link>
-        </div>
+        {currentUsername === username && (
+          <div className="md:ml-auto">
+            <Link href={`/profile/${username}/edit`}>
+              <div className="btn-secondary font-semibold">
+                Edit Details
+              </div>
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-6 text-center mb-5">
