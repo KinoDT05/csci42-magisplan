@@ -14,6 +14,7 @@ export async function POST(req: Request) {
         middleName,
         lastName,
         contactNumber,
+        username
     } = await req.json();
 
     if (!emailAddress ||
@@ -64,7 +65,8 @@ export async function POST(req: Request) {
         middleName,
         lastName,
         contactNumber,
-        password: hashedPassword
+        password: hashedPassword,
+        username
     });
 
     if (insertError) {
