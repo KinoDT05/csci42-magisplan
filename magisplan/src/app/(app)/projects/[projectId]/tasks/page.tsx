@@ -20,7 +20,7 @@ export default function TaskPage() {
     const [committeeTask, setCommitteeTask] = useState("");
     const [userID, setUserID] = useState("");
     const [projectName, setProjectName] = useState(""); 
-
+    const [canEdit, setCanEdit] = useState(false); 
     // get project name
     useEffect(() => {
         const fetchProject = async () => {
@@ -57,7 +57,13 @@ export default function TaskPage() {
 
                 if (data) {
                     setCommitteeOfUser(data.committee.committeeName);
+
                     setRoleOfUser(data.role);
+
+                    if (data.role === "Head" || data.committee.committeeName === "Moderators") {
+                        setCanEdit(true);
+                    }
+
                     setUserID(user.id)
                 } 
 
@@ -106,7 +112,7 @@ export default function TaskPage() {
 
             {/* create task and filtering */}
             <div className="flex my-5">
-                {!loading && committeeOfUser && (
+                {!loading && canEdit && committeeOfUser && (
                     <AddTaskModal committeeOfAdder={committeeOfUser} onRefresh={fetchTasks} />
                 )}
 
